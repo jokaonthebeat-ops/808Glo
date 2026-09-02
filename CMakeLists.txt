@@ -97,6 +97,8 @@ juce_add_plugin(808GloPro
     PLUGIN_CODE Eglo
     PRODUCT_NAME "808Glo Pro"
     DESCRIPTION "Elite synthesized 808 instrument"
+    ICON_BIG "${CMAKE_CURRENT_SOURCE_DIR}/Resources/AppIcon_1024.png"
+    ICON_SMALL "${CMAKE_CURRENT_SOURCE_DIR}/Resources/AppIcon_512.png"
     VERSION ${PROJECT_VERSION}
     FORMATS ${GLO_FORMATS}
     IS_SYNTH TRUE
@@ -160,6 +162,23 @@ target_link_libraries(808GloPro
 )
 
 if(GLO_BUILD_TOOLS)
+    add_executable(808GloRenderAppIcon
+        Tests/RenderAppIcon.cpp
+    )
+    target_include_directories(808GloRenderAppIcon PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/Source"
+        "$<TARGET_PROPERTY:808GloPro,JUCE_GENERATED_SOURCES_DIRECTORY>"
+        "$<TARGET_PROPERTY:808GloPro,INCLUDE_DIRECTORIES>"
+    )
+    target_link_libraries(808GloRenderAppIcon PRIVATE 808GloPro)
+    add_dependencies(808GloRenderAppIcon 808GloPro)
+
+    if(MSVC)
+        target_compile_options(808GloRenderAppIcon PRIVATE /W4 /permissive-)
+    else()
+        target_compile_options(808GloRenderAppIcon PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+
     add_executable(808GloRenderUIPreview
         Tests/RenderUIPreview.cpp
     )
