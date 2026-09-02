@@ -1,0 +1,32 @@
+808GLO PRO - WINDOWS INSTALL
+Diamond Loopz
+============================
+
+VST3 (recommended)
+------------------
+Copy the entire "808Glo Pro.vst3" folder into:
+
+    C:\Program Files\Common Files\VST3
+
+Then rescan plug-ins in your DAW (FL Studio, Ableton Live, REAPER, Cubase,
+Studio One - anything that hosts VST3).
+
+Standalone
+----------
+"808Glo Pro.exe" runs from anywhere - Desktop, Program Files, a USB stick.
+No extra files are needed: the interface artwork and all 128 factory presets
+are embedded in the program itself.
+
+Windows may show a SmartScreen prompt the first time you run the .exe
+("Windows protected your PC"). Click "More info", then "Run anyway". This
+appears because the file is not Authenticode-signed, not because anything is
+wrong with it. Loading the VST3 in a DAW shows no prompt at all.
+
+User presets
+------------
+Your own presets are saved as portable .808glo files under your user
+application-data folder and survive reinstalling or updating the plug-in.
+
+Uninstall
+---------
+Delete "808Glo Pro.vst3" from the VST3 folder and delete "808Glo Pro.exe".

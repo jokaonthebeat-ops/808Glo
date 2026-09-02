@@ -1,0 +1,214 @@
+# =============================================================================
+#  Builds the Windows VST3 and standalone on a GitHub-hosted Windows runner,
+#  and publishes them to a GitHub Release when a v* tag is pushed.
+#
+#  A Windows VST3 is a PE DLL and must be compiled by MSVC on Windows; it
+#  cannot be produced from the macOS development machine at all.
+#
+#  JUCE is fetched at the pinned 9.0.1 tag through the project's own
+#  GLO_FETCH_JUCE path, so CI builds against exactly the version the release
+#  checklist requires. The build is gated on ctest and pluginval, the Windows
+#  counterparts of the ctest + auval gates the macOS release runs.
+# =============================================================================
+
+name: Windows
+
+on:
+  workflow_dispatch:          # run it by hand from the Actions tab
+  push:
+    branches: [main, master]
+    tags: ['v*']              # a v* tag also publishes a Release
+
+permissions:
+  contents: write             # required to create the Release
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # The generator is discovered rather than hardcoded. Pinning
+      # "Visual Studio 17 2022" breaks the moment the runner image moves to a
+      # newer Visual Studio - the compiler is still there, only the name changed.
+      - name: Find Visual Studio
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          if (-not (Test-Path $vswhere)) { throw "vswhere not found - no Visual Studio on this runner" }
+
+          $vs = & $vswhere -latest -products * `
+                  -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+                  -property catalog_productLineVersion
+          if (-not $vs) { throw "no Visual Studio with the C++ toolset installed" }
+
+          Write-Host "Visual Studio $vs"
+          $gen = switch ($vs) {
+            "2022" { "Visual Studio 17 2022" }
+            "2026" { "Visual Studio 18 2026" }
+            default { "" }
+          }
+          echo "VS_GENERATOR=$gen" >> $env:GITHUB_ENV
+
+      - name: Configure
+        shell: pwsh
+        run: |
+          $flags = @(
+            "-DGLO_FETCH_JUCE=ON",
+            "-DGLO_BUILD_PLUGIN=ON",
+            "-DGLO_BUILD_TESTS=ON",
+            "-DGLO_BUILD_TOOLS=OFF"
+          )
+          if ($env:VS_GENERATOR) {
+            cmake -B build-cmake -G "$env:VS_GENERATOR" -A x64 @flags
+          } else {
+            Write-Host "Unrecognised Visual Studio version - using CMake's default generator"
+            cmake -B build-cmake -A x64 @flags
+          }
+
+      - name: Build
+        run: cmake --build build-cmake --config Release --parallel
+
+      # Core DSP, the 128-preset validator, and the JUCE processor integration
+      # tests - the same three gates the macOS release ran.
+      - name: Test
+        run: ctest --test-dir build-cmake -C Release --output-on-failure
+
+      - name: Locate artefacts
+        shell: pwsh
+        run: |
+          $vst3 = Get-ChildItem -Recurse -Directory -Filter "808Glo Pro.vst3" build-cmake |
+                  Select-Object -First 1
+          if (-not $vst3) { throw "VST3 not found - the build produced nothing" }
+          echo "VST3_PATH=$($vst3.FullName)" >> $env:GITHUB_ENV
+          Write-Host "VST3: $($vst3.FullName)"
+
+      # pluginval instantiates the plugin, sweeps parameters, renders audio at
+      # several sample rates and buffer sizes, and checks state round-trips.
+      # Level 5 is the gate; the release checklist's level-10 pass runs
+      # afterwards for information until it is proven stable on the runner.
+      #
+      # Neither pass uses --validate-in-process: out-of-process, a crash in the
+      # child is reported with the test that caused it instead of killing the
+      # runner silently.
+      - name: Fetch pluginval
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/Tracktion/pluginval/releases/download/v1.0.3/pluginval_Windows.zip" -OutFile pluginval.zip
+          Expand-Archive pluginval.zip -DestinationPath pluginval
+          $exe = Get-ChildItem -Recurse -Filter "pluginval.exe" pluginval | Select-Object -First 1
+          echo "PLUGINVAL=$($exe.FullName)" >> $env:GITHUB_ENV
+
+      # pluginval's progress logging drowns its verdict, and PowerShell prints
+      # the throw wherever stderr happens to interleave - which is not where the
+      # failure occurred. Capture the run and print only what matters.
+      - name: Validate (strictness 5, blocking)
+        shell: pwsh
+        run: |
+          & "$env:PLUGINVAL" --strictness-level 5 --timeout-ms 300000 "$env:VST3_PATH" 2>&1 |
+            Tee-Object -FilePath pluginval-5.log
+          $code = $LASTEXITCODE
+
+          Write-Host "`n================ VERDICT (exit $code) ================"
+          Select-String -Path pluginval-5.log -Pattern "FAIL|fail|\*\*\*|assert|Error|error" |
+            ForEach-Object { Write-Host $_.Line }
+          Write-Host "================ last 25 lines ================"
+          Get-Content pluginval-5.log -Tail 25
+
+          if ($code -ne 0) { throw "pluginval failed at strictness 5 (see verdict above)" }
+
+      - name: Validate (strictness 10, informational)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          & "$env:PLUGINVAL" --strictness-level 10 --timeout-ms 300000 "$env:VST3_PATH" 2>&1 |
+            Tee-Object -FilePath pluginval-10.log
+          Write-Host "`n================ VERDICT (exit $LASTEXITCODE) ================"
+          Get-Content pluginval-10.log -Tail 25
+
+      - name: Upload pluginval logs
+        if: failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: pluginval-logs
+          path: pluginval-*.log
+          retention-days: 7
+
+      # Manual install ZIP. These binaries are NOT Authenticode-signed - a
+      # Windows certificate is a separate purchase - so shipping an unsigned
+      # .exe installer would put a SmartScreen wall in front of every user.
+      # Copying a .vst3 folder into place triggers nothing.
+      - name: Assemble distribution ZIP
+        shell: pwsh
+        run: |
+          # Every error is fatal. A green run with no deliverable is worse than
+          # a red one.
+          $ErrorActionPreference = 'Stop'
+          $stage = "dist-zip\808Glo Pro"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+
+          Copy-Item -Recurse "$env:VST3_PATH" $stage
+
+          $exe = Get-ChildItem -Recurse -Filter "808Glo Pro.exe" build-cmake |
+                 Select-Object -First 1
+          if (-not $exe) { throw "standalone .exe not found" }
+          Copy-Item $exe.FullName $stage
+          # Factory presets and artwork are embedded in the binaries - nothing
+          # else ships beside the .exe.
+
+          Copy-Item packaging\windows\INSTALL.txt "$stage\INSTALL.txt"
+          Copy-Item LICENSE.txt "$stage\License.txt"
+
+          # Tag builds carry the tag's version; branch builds are "dev".
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $version = "${{ github.ref_name }}".TrimStart("v")
+          } else {
+            $version = "dev"
+          }
+          $zip = "808GloPro-$version-Windows-x64.zip"
+          Compress-Archive -Path $stage -DestinationPath $zip -Force
+          echo "DIST_ZIP=$zip" >> $env:GITHUB_ENV
+
+          Write-Host "--- ZIP contents ---"
+          Get-ChildItem -Recurse $stage | ForEach-Object { $_.FullName.Replace((Get-Location).Path, "") }
+
+      # Only for branch builds - on a tag the same ZIP is attached to the
+      # Release, and uploading it twice burns the storage quota for nothing.
+      - name: Upload distribution ZIP
+        if: ${{ ! startsWith(github.ref, 'refs/tags/v') }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: 808GloPro-Windows-DISTRIBUTE-THIS
+          path: ${{ env.DIST_ZIP }}
+          if-no-files-found: error
+          retention-days: 14
+
+      # Only a v* tag publishes. A branch push just leaves the artifact above,
+      # so ordinary commits never create half-finished Releases.
+      - name: Publish to GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.DIST_ZIP }}
+          name: 808Glo Pro ${{ github.ref_name }}
+          body: |
+            **808Glo Pro ${{ github.ref_name }} — Windows**
+
+            VST3 and standalone, x64, built against JUCE 9.0.1 and validated on
+            a Windows runner (ctest + pluginval strictness 5).
+
+            Unzip and read `INSTALL.txt`. In short: copy `808Glo Pro.vst3` into
+            `C:\Program Files\Common Files\VST3`; `808Glo Pro.exe` runs from
+            anywhere — all 128 factory presets are embedded.
+
+            These binaries are not Authenticode-signed, so the standalone may
+            show a SmartScreen prompt (More info → Run anyway). The VST3 route
+            shows nothing.
+
+            The macOS build is a separate signed and notarised installer.
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
