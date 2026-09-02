@@ -128,7 +128,19 @@ int main(int argc, const char *argv[]) {
 
         if (audioPath) {
             AVURLAsset *aAsset = [AVURLAsset URLAssetWithURL:[NSURL fileURLWithPath:audioPath] options:nil];
-            AVAssetTrack *aTrack = [[aAsset tracksWithMediaType:AVMediaTypeAudio] firstObject];
+            // The synchronous tracksWithMediaType: can deadlock forever when
+            // called without a pumping runloop (it stalled this tool at 0
+            // bytes written). The async loader's completion fires on its own
+            // queue, so a semaphore wait here is safe.
+            __block AVAssetTrack *aTrack = nil;
+            dispatch_semaphore_t trackSem = dispatch_semaphore_create(0);
+            [aAsset loadTracksWithMediaType:AVMediaTypeAudio
+                          completionHandler:^(NSArray<AVAssetTrack *> *tracks, NSError *loadErr) {
+                (void)loadErr;
+                aTrack = tracks.firstObject;
+                dispatch_semaphore_signal(trackSem);
+            }];
+            dispatch_semaphore_wait(trackSem, DISPATCH_TIME_FOREVER);
             if (!aTrack) { fprintf(stderr, "no audio track in %s\n", audioPath.UTF8String); return 2; }
 
             audioReader = [AVAssetReader assetReaderWithAsset:aAsset error:&err];
@@ -167,6 +179,16 @@ int main(int argc, const char *argv[]) {
 
         CGColorSpaceRef cs = CGColorSpaceCreateDeviceRGB();
         int written = 0;
+        int audioAppended = 0;
+        BOOL audioDone = YES;
+        if (audioIn) {
+            if ([audioReader startReading]) {
+                audioDone = NO;
+            } else {
+                fprintf(stderr, "  WARNING: could not read audio (%s) - writing silent video\n",
+                        audioReader.error.localizedDescription.UTF8String);
+            }
+        }
 
         for (NSUInteger i = 0; i < frames.count; ++i) {
             CGImageRef img = loadPNG(frames[i]);
@@ -206,32 +228,41 @@ int main(int argc, const char *argv[]) {
             }
             CVPixelBufferRelease(pb);
             ++written;
+
+            // The writer INTERLEAVES its tracks: with an audio input attached,
+            // the video input stops accepting frames once the picture runs too
+            // far ahead of the sound, and a video-first design then spins
+            // forever on isReadyForMoreMediaData with a zero-byte file (this
+            // stalled every clip longer than the writer's buffer). Feed audio
+            // alongside the picture, up to about a second ahead of it.
+            while (!audioDone && audioIn.isReadyForMoreMediaData) {
+                CMSampleBufferRef sb = [audioOut copyNextSampleBuffer];
+                if (!sb) { audioDone = YES; break; }
+                BOOL ahead = CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sb))
+                                 > (double)(written) / fps + 1.0;
+                if (![audioIn appendSampleBuffer:sb]) { CFRelease(sb); audioDone = YES; break; }
+                CFRelease(sb);
+                ++audioAppended;
+                if (ahead) break;
+            }
         }
 
         CGColorSpaceRelease(cs);
         [input markAsFinished];
 
-        // Audio is pumped after the picture. The writer is not real-time, so
-        // the inputs do not have to be interleaved - only both finished before
-        // the file is closed.
+        // Drain whatever audio remains beyond the last video frame.
         if (audioIn) {
-            int appended = 0;
-            if ([audioReader startReading]) {
-                while (1) {
-                    CMSampleBufferRef sb = [audioOut copyNextSampleBuffer];
-                    if (!sb) break;
-                    while (!audioIn.isReadyForMoreMediaData)
-                        [NSThread sleepForTimeInterval:0.002];
-                    if (![audioIn appendSampleBuffer:sb]) { CFRelease(sb); break; }
-                    CFRelease(sb);
-                    ++appended;
-                }
-                printf("  muxed %d audio buffers from %s (from %.1fs)\n",
-                       appended, [audioPath lastPathComponent].UTF8String, audioStart);
-            } else {
-                fprintf(stderr, "  WARNING: could not read audio (%s) - writing silent video\n",
-                        audioReader.error.localizedDescription.UTF8String);
+            while (!audioDone) {
+                CMSampleBufferRef sb = [audioOut copyNextSampleBuffer];
+                if (!sb) break;
+                while (!audioIn.isReadyForMoreMediaData)
+                    [NSThread sleepForTimeInterval:0.002];
+                if (![audioIn appendSampleBuffer:sb]) { CFRelease(sb); break; }
+                CFRelease(sb);
+                ++audioAppended;
             }
+            printf("  muxed %d audio buffers from %s (from %.1fs)\n",
+                   audioAppended, [audioPath lastPathComponent].UTF8String, audioStart);
             // ALWAYS finish this input. An input that is added to the writer
             // and never marked finished makes finishWriting hang forever, with
             // a zero-byte file and no error - which is exactly what happened.
