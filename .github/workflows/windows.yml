@@ -117,7 +117,17 @@ jobs:
           Write-Host "================ last 25 lines ================"
           Get-Content pluginval-5.log -Tail 25
 
-          if ($code -ne 0) { throw "pluginval failed at strictness 5 (see verdict above)" }
+          if ($code -ne 0) {
+            # Surface the verdict as check-run annotations: they are readable
+            # through the public API, so a failure can be diagnosed from the
+            # development Mac without authenticated log access.
+            Select-String -Path pluginval-5.log -Pattern "FAILED|Assertion|exception|violation" |
+              Select-Object -First 4 |
+              ForEach-Object { Write-Host "::error::PLUGINVAL: $($_.Line)" }
+            Get-Content pluginval-5.log -Tail 6 |
+              ForEach-Object { Write-Host "::error::TAIL: $_" }
+            throw "pluginval failed at strictness 5 (see annotations and log artifact)"
+          }
 
       - name: Validate (strictness 10, informational)
         shell: pwsh
