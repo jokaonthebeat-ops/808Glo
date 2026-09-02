@@ -52,9 +52,14 @@ public:
     [[nodiscard]] bool consumeCeilingHit() noexcept;
     int copyLatestScopeSamples (float* destination, int maximumSamples) const noexcept;
 
+    // Message-thread only: drains the host-MIDI mirror queue into keyboardState
+    // so the UI keyboard lights for notes played from the host or a controller.
+    void applyPendingHostNotesToKeyboard();
+
 private:
     static constexpr std::size_t scopeCapacity = 16384;
     static constexpr std::uint32_t uiNoteQueueCapacity = 128;
+    static constexpr std::uint32_t hostNoteQueueCapacity = 256;
 
     struct UiNoteEvent
     {
@@ -64,6 +69,7 @@ private:
     };
 
     static_assert ((uiNoteQueueCapacity & (uiNoteQueueCapacity - 1u)) == 0u);
+    static_assert ((hostNoteQueueCapacity & (hostNoteQueueCapacity - 1u)) == 0u);
     static_assert (std::atomic<std::uint32_t>::is_always_lock_free);
     static_assert (std::atomic<bool>::is_always_lock_free);
 
@@ -73,6 +79,7 @@ private:
     void handleNoteOff (juce::MidiKeyboardState*, int midiChannel,
                         int midiNoteNumber, float velocity) noexcept override;
     void enqueueUiNote (int midiNoteNumber, float velocity, bool isNoteOn) noexcept;
+    void enqueueHostNoteMirror (int midiNoteNumber, float velocity, bool isNoteOn) noexcept;
     void drainUiNoteQueue (const glo::dsp::VoiceParameters&) noexcept;
     void discardUiNoteQueueAndPanic() noexcept;
     void processColourAndDynamics (juce::AudioBuffer<float>& buffer) noexcept;
@@ -106,6 +113,17 @@ private:
     alignas (64) std::atomic<std::uint32_t> uiNoteWriteIndex { 0 };
     alignas (64) std::atomic<std::uint32_t> uiNoteReadIndex { 0 };
     std::atomic<bool> uiNoteOverflowPanic { false };
+
+    // Mirror of host MIDI notes for the UI keyboard display. The audio thread
+    // is the sole producer and the editor timer the sole consumer; on overflow
+    // or all-notes-off the display is resynchronised via hostNoteMirrorReset
+    // rather than risking a stuck-lit key. applyingHostNoteMirror is touched by
+    // the message thread only and stops mirrored notes re-entering uiNoteQueue.
+    std::array<UiNoteEvent, hostNoteQueueCapacity> hostNoteQueue {};
+    alignas (64) std::atomic<std::uint32_t> hostNoteWriteIndex { 0 };
+    alignas (64) std::atomic<std::uint32_t> hostNoteReadIndex { 0 };
+    std::atomic<bool> hostNoteMirrorReset { false };
+    bool applyingHostNoteMirror { false };
 
     std::array<std::atomic<float>, 2> peakLevels {};
     std::array<std::atomic<float>, 2> rmsLevels {};

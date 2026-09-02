@@ -242,10 +242,12 @@ void EightOhEightGloProAudioProcessor::handleMidiMessage (
     if (message.isNoteOn())
     {
         synthEngine.noteOn (message.getNoteNumber(), message.getFloatVelocity(), voiceParameters);
+        enqueueHostNoteMirror (message.getNoteNumber(), message.getFloatVelocity(), true);
     }
     else if (message.isNoteOff())
     {
         synthEngine.noteOff (message.getNoteNumber(), voiceParameters);
+        enqueueHostNoteMirror (message.getNoteNumber(), message.getFloatVelocity(), false);
     }
     else if (message.isPitchWheel())
     {
@@ -261,10 +263,12 @@ void EightOhEightGloProAudioProcessor::handleMidiMessage (
     else if (message.isAllNotesOff())
     {
         synthEngine.allNotesOff (true);
+        hostNoteMirrorReset.store (true, std::memory_order_release);
     }
     else if (message.isAllSoundOff())
     {
         synthEngine.allNotesOff (false);
+        hostNoteMirrorReset.store (true, std::memory_order_release);
     }
 }
 
@@ -274,6 +278,8 @@ void EightOhEightGloProAudioProcessor::handleNoteOn (juce::MidiKeyboardState* so
                                                       float velocity) noexcept
 {
     juce::ignoreUnused (source, midiChannel);
+    if (applyingHostNoteMirror)
+        return;
     enqueueUiNote (midiNoteNumber, velocity, true);
 }
 
@@ -283,6 +289,8 @@ void EightOhEightGloProAudioProcessor::handleNoteOff (juce::MidiKeyboardState* s
                                                        float velocity) noexcept
 {
     juce::ignoreUnused (source, midiChannel);
+    if (applyingHostNoteMirror)
+        return;
     enqueueUiNote (midiNoteNumber, velocity, false);
 }
 
@@ -350,6 +358,59 @@ void EightOhEightGloProAudioProcessor::discardUiNoteQueueAndPanic() noexcept
     uiNoteReadIndex.store (uiNoteWriteIndex.load (std::memory_order_acquire),
                            std::memory_order_release);
     synthEngine.allNotesOff (false);
+}
+
+void EightOhEightGloProAudioProcessor::enqueueHostNoteMirror (int midiNoteNumber,
+                                                               float velocity,
+                                                               bool isNoteOn) noexcept
+{
+    const auto write = hostNoteWriteIndex.load (std::memory_order_relaxed);
+    const auto read = hostNoteReadIndex.load (std::memory_order_acquire);
+
+    if (write - read >= hostNoteQueueCapacity)
+    {
+        // Dropping a mirrored note-off would leave a key lit forever, so ask
+        // the message thread to resynchronise the whole display instead.
+        hostNoteMirrorReset.store (true, std::memory_order_release);
+        return;
+    }
+
+    auto& event = hostNoteQueue[write & (hostNoteQueueCapacity - 1u)];
+    event.velocity = juce::jlimit (0.0f, 1.0f, velocity);
+    event.note = static_cast<std::uint8_t> (juce::jlimit (0, 127, midiNoteNumber));
+    event.noteOn = isNoteOn;
+    hostNoteWriteIndex.store (write + 1u, std::memory_order_release);
+}
+
+void EightOhEightGloProAudioProcessor::applyPendingHostNotesToKeyboard()
+{
+    applyingHostNoteMirror = true;
+
+    if (hostNoteMirrorReset.exchange (false, std::memory_order_acq_rel))
+    {
+        hostNoteReadIndex.store (hostNoteWriteIndex.load (std::memory_order_acquire),
+                                 std::memory_order_release);
+        keyboardState.allNotesOff (0);
+    }
+
+    auto read = hostNoteReadIndex.load (std::memory_order_relaxed);
+    for (;;)
+    {
+        const auto write = hostNoteWriteIndex.load (std::memory_order_acquire);
+        if (read == write)
+            break;
+
+        const auto event = hostNoteQueue[read & (hostNoteQueueCapacity - 1u)];
+        ++read;
+        hostNoteReadIndex.store (read, std::memory_order_release);
+
+        if (event.noteOn)
+            keyboardState.noteOn (1, event.note, std::max (event.velocity, 1.0f / 127.0f));
+        else
+            keyboardState.noteOff (1, event.note, event.velocity);
+    }
+
+    applyingHostNoteMirror = false;
 }
 
 void EightOhEightGloProAudioProcessor::processColourAndDynamics (juce::AudioBuffer<float>& buffer) noexcept

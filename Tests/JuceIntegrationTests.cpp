@@ -140,6 +140,63 @@ int main()
     check (keyboardProcessor.getTailLengthSeconds() >= 11.5,
            "tail reporting must include attack, hold, decay, release, and residual filters");
 
+    // Host MIDI must light the UI keyboard through the lock-free mirror, and a
+    // mirrored note must never re-enter the UI note queue and re-trigger the
+    // synth. Sustain level zero makes an accidental re-trigger audible.
+    EightOhEightGloProAudioProcessor mirrorProcessor;
+    const auto setMirrorParameter = [&mirrorProcessor] (const char* parameterID, float actualValue)
+    {
+        auto* parameter = mirrorProcessor.getParameterState().getParameter (parameterID);
+        check (parameter != nullptr, std::string ("missing mirror test parameter: ") + parameterID);
+        if (parameter != nullptr)
+            parameter->setValueNotifyingHost (parameter->convertTo0to1 (actualValue));
+    };
+    setMirrorParameter (glo::ids::triggerMode, 1.0f);
+    setMirrorParameter (glo::ids::attack, 0.05f);
+    setMirrorParameter (glo::ids::decay, 30.0f);
+    setMirrorParameter (glo::ids::sustain, 0.0f);
+    setMirrorParameter (glo::ids::release, 5.0f);
+    mirrorProcessor.prepareToPlay (48000.0, 512);
+
+    juce::AudioBuffer<float> mirrorAudio (2, 512);
+    juce::MidiBuffer mirrorMidi;
+    mirrorMidi.addEvent (juce::MidiMessage::noteOn (1, 60, static_cast<juce::uint8> (100)), 0);
+    mirrorProcessor.processBlock (mirrorAudio, mirrorMidi);
+    mirrorMidi.clear();
+
+    for (int block = 0; block < 40; ++block)
+        mirrorProcessor.processBlock (mirrorAudio, mirrorMidi);
+    const auto silentBeforeMirror = std::max (mirrorAudio.getMagnitude (0, 0, 512),
+                                              mirrorAudio.getMagnitude (1, 0, 512));
+    check (silentBeforeMirror < 1.0e-4f,
+           "a zero-sustain gated note must decay to silence while held");
+
+    mirrorProcessor.applyPendingHostNotesToKeyboard();
+    check (mirrorProcessor.getKeyboardState().isNoteOn (1, 60),
+           "a host note-on must light the UI keyboard after the mirror drain");
+
+    mirrorProcessor.processBlock (mirrorAudio, mirrorMidi);
+    const auto peakAfterMirror = std::max (mirrorAudio.getMagnitude (0, 0, 512),
+                                           mirrorAudio.getMagnitude (1, 0, 512));
+    check (peakAfterMirror < 1.0e-4f,
+           "mirroring host notes to the keyboard must not re-trigger the synth");
+
+    mirrorMidi.addEvent (juce::MidiMessage::noteOff (1, 60, static_cast<juce::uint8> (0)), 0);
+    mirrorProcessor.processBlock (mirrorAudio, mirrorMidi);
+    mirrorMidi.clear();
+    mirrorProcessor.applyPendingHostNotesToKeyboard();
+    check (! mirrorProcessor.getKeyboardState().isNoteOn (1, 60),
+           "a host note-off must unlight the UI keyboard after the mirror drain");
+
+    mirrorMidi.addEvent (juce::MidiMessage::noteOn (1, 64, static_cast<juce::uint8> (100)), 0);
+    mirrorMidi.addEvent (juce::MidiMessage::allNotesOff (1), 64);
+    mirrorProcessor.processBlock (mirrorAudio, mirrorMidi);
+    mirrorMidi.clear();
+    mirrorProcessor.applyPendingHostNotesToKeyboard();
+    check (! mirrorProcessor.getKeyboardState().isNoteOn (1, 64),
+           "all-notes-off must clear the mirrored UI keyboard display");
+    mirrorProcessor.releaseResources();
+
     processor.setCurrentProgram (37);
     juce::MemoryBlock state;
     processor.getStateInformation (state);

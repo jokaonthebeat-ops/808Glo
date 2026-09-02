@@ -446,11 +446,15 @@ EightOhEightGloProAudioProcessorEditor::EightOhEightGloProAudioProcessorEditor (
     keyboard.setScrollButtonsVisible (false);
     keyboard.setKeyWidth (31.0f);
     keyboard.setColour (juce::MidiKeyboardComponent::whiteNoteColourId,
-                        glo::ui::GloPalette::textSecondary());
-    keyboard.setColour (juce::MidiKeyboardComponent::blackNoteColourId,
                         glo::ui::GloPalette::canvas());
-    keyboard.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId,
+    keyboard.setColour (juce::MidiKeyboardComponent::blackNoteColourId,
                         glo::ui::GloPalette::accent());
+    keyboard.setColour (juce::MidiKeyboardComponent::keySeparatorLineColourId,
+                        glo::ui::GloPalette::accent().withAlpha (0.30f));
+    keyboard.setColour (juce::MidiKeyboardComponent::textLabelColourId,
+                        glo::ui::GloPalette::accent().withAlpha (0.85f));
+    keyboard.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId,
+                        glo::ui::GloPalette::accentHot());
     keyboard.setColour (juce::MidiKeyboardComponent::mouseOverKeyOverlayColourId,
                         glo::ui::GloPalette::accent().withAlpha (0.24f));
 
@@ -548,6 +552,8 @@ bool EightOhEightGloProAudioProcessorEditor::keyPressed (const juce::KeyPress& k
 
 void EightOhEightGloProAudioProcessorEditor::timerCallback()
 {
+    processor.applyPendingHostNotesToKeyboard();
+
     const auto leftPeak = processor.getPeakLevel (0);
     const auto rightPeak = processor.getPeakLevel (1);
     logo.setSignalIntensity (juce::jlimit (0.0f, 1.0f, std::max (leftPeak, rightPeak)));
