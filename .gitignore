@@ -1,0 +1,9 @@
+/build/
+/.cache/
+__pycache__/
+*.py[cod]
+*.user
+*.suo
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+.DS_Store

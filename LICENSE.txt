@@ -1,0 +1,13 @@
+808GLO PRO SOURCE PACKAGE
+Copyright (c) 2026 Diamond Loopz. All rights reserved.
+
+This project is proprietary source material prepared for Diamond Loopz. No
+permission is granted to redistribute, sublicense, resell, publish, or use this
+source code or its factory preset bank outside an authorized Diamond Loopz
+product without written permission from the copyright holder.
+
+Third-party components, including JUCE, remain subject to their own licences.
+The distributor is responsible for maintaining an appropriate JUCE licence and
+for complying with all third-party licence, notice, signing, and distribution
+requirements before releasing binary builds.
+
