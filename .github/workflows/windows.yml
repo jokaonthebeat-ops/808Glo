@@ -76,12 +76,24 @@ jobs:
       - name: Test
         run: ctest --test-dir build-cmake -C Release --output-on-failure
 
+      # JUCE's configure pre-creates EMPTY per-config artefact skeletons, so a
+      # bare recursive search can match the hollow Debug bundle and pluginval
+      # then reports "binary is missing" (run 1 failed exactly this way).
+      # Pin the Release tree and prove the inner DLL exists before validating.
       - name: Locate artefacts
         shell: pwsh
         run: |
           $vst3 = Get-ChildItem -Recurse -Directory -Filter "808Glo Pro.vst3" build-cmake |
+                  Where-Object { $_.FullName -like "*\Release\*" } |
                   Select-Object -First 1
-          if (-not $vst3) { throw "VST3 not found - the build produced nothing" }
+          if (-not $vst3) { throw "Release VST3 not found - the build produced nothing" }
+
+          $dll = Join-Path $vst3.FullName "Contents\x86_64-win\808Glo Pro.vst3"
+          if (-not (Test-Path $dll)) {
+            Get-ChildItem -Recurse $vst3.FullName | ForEach-Object { Write-Host $_.FullName }
+            throw "VST3 bundle exists but the inner DLL is missing"
+          }
+
           echo "VST3_PATH=$($vst3.FullName)" >> $env:GITHUB_ENV
           Write-Host "VST3: $($vst3.FullName)"
 
@@ -163,8 +175,9 @@ jobs:
           Copy-Item -Recurse "$env:VST3_PATH" $stage
 
           $exe = Get-ChildItem -Recurse -Filter "808Glo Pro.exe" build-cmake |
+                 Where-Object { $_.FullName -like "*\Release\*" } |
                  Select-Object -First 1
-          if (-not $exe) { throw "standalone .exe not found" }
+          if (-not $exe) { throw "Release standalone .exe not found" }
           Copy-Item $exe.FullName $stage
           # Factory presets and artwork are embedded in the binaries - nothing
           # else ships beside the .exe.
