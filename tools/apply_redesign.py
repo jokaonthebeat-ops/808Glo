@@ -25,14 +25,71 @@ EXPECTED_COUNTS = {
     "Mix Ready": 16,
 }
 
+# Category invariants enforced by validate_presets.py. These are requirements of
+# the CATEGORY, not design choices, so a proposal that misses one is repaired to
+# the boundary rather than rejected - but every repair is printed, because a
+# silent repair is how a bank drifts away from what was actually designed.
+CATEGORY_INVARIANTS = {
+    "Long Glide": {"voiceMode": ("==", 0), "legato": ("==", 1), "triggerMode": ("==", 1),
+                   "glide": (">=", 350), "sustain": (">=", 0.6)},
+    "Short Punch": {"triggerMode": ("==", 0), "decay": ("<=", 600), "release": ("<=", 120)},
+    "Drill": {"voiceMode": ("==", 0), "legato": ("==", 1), "glide": (">=", 80)},
+    "Distorted": {"drive": (">=", 16)},
+    "Clean & Sub": {"drive": ("<=", 2)},
+}
 
-def load_ranges():
-    source = GENERATOR.read_text()
-    block = re.search(r"PARAMETER_RANGES.*?OrderedDict\(\s*\[(.*?)\]\s*\)", source, re.S).group(1)
-    ranges = {}
-    for name, lo, hi in re.findall(r'\("(\w+)",\s*\(([-\d.]+),\s*([-\d.]+)\)\)', block):
-        ranges[name] = (float(lo), float(hi))
-    return ranges
+
+def repair_category(category, name, overrides, repairs, inherited):
+    """Force the category invariants, then the cross-cutting legato rule.
+
+    Checks the EFFECTIVE value the generator will emit (defaults, then the
+    category base, then this preset's overrides). Judging the override alone
+    reports repairs for presets that already satisfy the rule by inheritance.
+    """
+    def effective(param, fallback=0):
+        if param in overrides:
+            return float(overrides[param])
+        if param in inherited:
+            return float(inherited[param])
+        return float(fallback)
+
+    for param, (operator, bound) in CATEGORY_INVARIANTS.get(category, {}).items():
+        value = effective(param)
+        if operator == "==" and value != bound:
+            overrides[param] = bound
+            repairs.append(f"{category}/{name}: {param} {value} -> {bound} (category rule)")
+        elif operator == ">=" and value < bound:
+            overrides[param] = bound
+            repairs.append(f"{category}/{name}: {param} {value} -> {bound} (category minimum)")
+        elif operator == "<=" and value > bound:
+            overrides[param] = bound
+            repairs.append(f"{category}/{name}: {param} {value} -> {bound} (category maximum)")
+
+    # legato anywhere requires mono and a nonzero glide.
+    if effective("legato") >= 0.5:
+        if effective("voiceMode") != 0:
+            overrides["voiceMode"] = 0
+            repairs.append(f"{category}/{name}: voiceMode -> 0 (legato requires mono)")
+        if effective("glide") <= 0:
+            overrides["glide"] = 80
+            repairs.append(f"{category}/{name}: glide -> 80 (legato requires nonzero glide)")
+
+
+def load_generator():
+    """Import the generator so ranges, defaults and category bases come from the
+    single source of truth rather than a second copy that can drift."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_gen", GENERATOR)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    ranges = {k: (float(lo), float(hi)) for k, (lo, hi) in module.PARAMETER_RANGES.items()}
+    inherited = {}
+    for category in EXPECTED_COUNTS:
+        merged = dict(module.DEFAULT_PARAMETERS)
+        merged.update(module.CATEGORY_BASES.get(category, {}))
+        inherited[category] = {k: (1 if v is True else 0 if v is False else v)
+                               for k, v in merged.items()}
+    return ranges, inherited
 
 
 def format_value(param, value):
@@ -53,10 +110,11 @@ def main():
         return 2
     payload = json.load(open(sys.argv[1]))
     dry_run = "--dry-run" in sys.argv
-    ranges = load_ranges()
+    ranges, inherited = load_generator()
 
     categories = payload["categories"] if isinstance(payload, dict) else payload
     errors = []
+    repairs = []
     by_category = {}
     seen_names = {}
 
@@ -93,6 +151,7 @@ def main():
                 overrides[param] = value
             if not overrides:
                 errors.append(f"{category}/{name}: no usable overrides")
+            repair_category(category, name, overrides, repairs, inherited.get(category, {}))
             cleaned.append({
                 "name": name,
                 "description": preset["description"].strip(),
@@ -133,6 +192,11 @@ def main():
     start = source.index('RECIPES: "OrderedDict[str, list[dict[str, Any]]]" = OrderedDict(')
     end = source.index("\ndef unique_tags", start)
     updated = source[:start] + new_block + "\n\n" + source[end:].lstrip("\n")
+
+    if repairs:
+        print(f"{len(repairs)} category-invariant repair(s):")
+        for repair in repairs:
+            print(f"  {repair}")
 
     total = sum(len(v) for v in by_category.values())
     if dry_run:
