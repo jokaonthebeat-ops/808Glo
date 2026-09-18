@@ -10,6 +10,7 @@ itself by ear.
   usage: apply_redesign.py <redesign.json> [--dry-run]
 """
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -83,13 +84,32 @@ def load_generator():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     ranges = {k: (float(lo), float(hi)) for k, (lo, hi) in module.PARAMETER_RANGES.items()}
+    validator = importlib.util.spec_from_file_location(
+        "_val", GENERATOR.parent / "validate_presets.py")
+    val_module = importlib.util.module_from_spec(validator)
+    validator.loader.exec_module(val_module)
+    intervals = dict(val_module.PARAMETER_INTERVALS)
     inherited = {}
     for category in EXPECTED_COUNTS:
         merged = dict(module.DEFAULT_PARAMETERS)
         merged.update(module.CATEGORY_BASES.get(category, {}))
         inherited[category] = {k: (1 if v is True else 0 if v is False else v)
                                for k, v in merged.items()}
-    return ranges, inherited
+    return ranges, inherited, intervals
+
+
+def snap(param, value, intervals, ranges):
+    """Snap to the JUCE NormalisableRange grid, mirroring the plugin's own
+    snapping. A searched value like pitchDrop=14.9622 is legal in range but not
+    on the 0.01 grid, and the validator rejects it - the plugin would silently
+    round it anyway, so the file must carry the value the plugin will use."""
+    interval = intervals.get(param, 0.0)
+    lo, hi = ranges[param]
+    value = min(max(float(value), lo), hi)
+    if interval <= 0:
+        return value
+    snapped = lo + interval * math.floor((value - lo) / interval + 0.5)
+    return min(max(snapped, lo), hi)
 
 
 def format_value(param, value):
@@ -110,7 +130,7 @@ def main():
         return 2
     payload = json.load(open(sys.argv[1]))
     dry_run = "--dry-run" in sys.argv
-    ranges, inherited = load_generator()
+    ranges, inherited, intervals = load_generator()
 
     categories = payload["categories"] if isinstance(payload, dict) else payload
     errors = []
@@ -148,7 +168,7 @@ def main():
                     errors.append(
                         f"{category}/{name}: {param}={value} outside legal range [{lo}, {hi}]")
                     continue
-                overrides[param] = value
+                overrides[param] = snap(param, value, intervals, ranges)
             if not overrides:
                 errors.append(f"{category}/{name}: no usable overrides")
             repair_category(category, name, overrides, repairs, inherited.get(category, {}))

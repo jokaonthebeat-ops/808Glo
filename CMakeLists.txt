@@ -179,6 +179,23 @@ if(GLO_BUILD_TOOLS)
         target_compile_options(808GloRenderAppIcon PRIVATE -Wall -Wextra -Wpedantic)
     endif()
 
+    add_executable(808GloPresetEval
+        Tests/PresetEval.cpp
+    )
+    target_include_directories(808GloPresetEval PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/Source"
+        "$<TARGET_PROPERTY:808GloPro,JUCE_GENERATED_SOURCES_DIRECTORY>"
+        "$<TARGET_PROPERTY:808GloPro,INCLUDE_DIRECTORIES>"
+    )
+    target_link_libraries(808GloPresetEval PRIVATE 808GloPro)
+    add_dependencies(808GloPresetEval 808GloPro)
+
+    if(MSVC)
+        target_compile_options(808GloPresetEval PRIVATE /W4 /permissive-)
+    else()
+        target_compile_options(808GloPresetEval PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+
     add_executable(808GloPresetProbe
         Tests/PresetProbe.cpp
     )
