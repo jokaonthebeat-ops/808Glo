@@ -22,7 +22,7 @@ def stats(path):
         'rows': rows, 'nearest': nearest,
         'min': ds[0], 'p10': ds[n // 10], 'median': ds[n // 2], 'p90': ds[(9 * n) // 10],
         'clones': sum(1 for d in ds if d < 0.35),
-        'knock': sorted(float(r['knockDb']) for r in rows),
+        'knock': sorted(float(r['punchDb']) for r in rows),
         'peak': sorted(float(r['peakDb']) for r in rows),
     }
 
@@ -37,8 +37,8 @@ line('nearest-neighbour  median', a['median'], b['median'])
 line('nearest-neighbour  p90', a['p90'], b['p90'])
 line('presets with a near-clone', a['clones'], b['clones'], False, '{:.0f}')
 k1, k2 = a['knock'], b['knock']
-line('knockDb median', k1[len(k1)//2], k2[len(k2)//2], True, '{:.2f}')
-line('knockDb p10 (weakest attacks)', k1[len(k1)//10], k2[len(k2)//10], True, '{:.2f}')
+line('punchDb median', k1[len(k1)//2], k2[len(k2)//2], True, '{:.2f}')
+line('punchDb p10 (weakest attacks)', k1[len(k1)//10], k2[len(k2)//10], True, '{:.2f}')
 p1, p2 = a['peak'], b['peak']
 line('peak dBFS median', p1[len(p1)//2], p2[len(p2)//2], True, '{:.2f}')
 line('peak dBFS max', p1[-1], p2[-1], False, '{:.2f}')

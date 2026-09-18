@@ -29,7 +29,7 @@ FEATURES = {
     "h3": 1.3,
     "h5": 1.1,
     "h7": 0.9,
-    "knockDb": 1.4,
+    "punchDb": 1.4,
     "attackHfDb": 1.3,
     "dropSemitones": 1.2,
     "settleMs": 1.0,

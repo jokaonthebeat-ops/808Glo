@@ -197,9 +197,27 @@ int main (int argc, char* argv[])
         }
 
         // --- harmonic structure ---------------------------------------------
-        // Measured in a settled window, after the pitch drop has landed.
-        const auto from = (size_t) (0.30 * sampleRate);
-        const auto to = (size_t) (0.80 * sampleRate);
+        // The window follows the preset's own envelope. A fixed 300-800 ms
+        // window is silence on a short preset, and Goertzel on silence returns
+        // the shape of the noise floor: a preset with harmonics=0 and body=0
+        // was reporting more third harmonic than presets that actually have one.
+        // At least four cycles of the fundamental are required, or the bins are
+        // too wide to separate adjacent partials.
+        constexpr double minimumWindow = 4.0 / 43.653;
+        double audibleEnd = 0.0;
+        for (double t = 0.005; t < renderSeconds; t += 0.005)
+            if (envelopeAt (x, t) > peakEnvelope * 0.02) // within 34 dB of the peak
+                audibleEnd = t;
+
+        double harmonicStart = 0.030;
+        double harmonicEnd = std::min (harmonicStart + 0.5, std::max (audibleEnd, 0.0));
+        if (harmonicEnd - harmonicStart < minimumWindow)
+        {
+            harmonicEnd = std::max (audibleEnd, minimumWindow + 0.002);
+            harmonicStart = std::max (0.002, harmonicEnd - minimumWindow);
+        }
+        const auto from = (size_t) (harmonicStart * sampleRate);
+        const auto to = std::min (x.size(), (size_t) (harmonicEnd * sampleRate));
         const auto h1 = goertzel (x, from, to, fundamental);
         const auto h2 = goertzel (x, from, to, fundamental * 2.0);
         const auto h3 = goertzel (x, from, to, fundamental * 3.0);
@@ -211,26 +229,38 @@ int main (int argc, char* argv[])
         // says how much of the sound each partial owns.
         const auto reference = std::max (h1 + h2 + h3 + h5 + h7, 1.0e-9);
 
-        // --- transient / knock ------------------------------------------------
-        // "Hard hitting" is the attack standing ABOVE the body, so the front
-        // 30 ms is compared with the sustained body rather than with the peak.
-        // Normalising the attack against the peak is degenerate: on an 808 the
-        // peak IS in the attack, so that ratio is near-constant by construction
-        // and was flat across all 128 presets.
+        // --- transient / punch ------------------------------------------------
+        // Transient dominance inside the window a listener hears as "the hit".
+        // Comparing the attack with a FIXED 250-500 ms body window is degenerate:
+        // on a short preset that window is silence, so the ratio exploded to
+        // 70-98 dB and the metric ended up ranking decay length rather than
+        // knock (it correlated -0.69 with log decay time). A crest factor over
+        // the first 150 ms is well defined for every preset, long or short.
         const auto clickWindow = (size_t) (0.030 * sampleRate);
         double attackPeak = 0.0;
         for (size_t i = 0; i < std::min (clickWindow, x.size()); ++i)
             attackPeak = std::max (attackPeak, std::abs ((double) x[i]));
 
-        double bodySum = 0.0;
+        const auto punchWindow = std::min (x.size(), (size_t) (0.150 * sampleRate));
+        double punchSum = 0.0;
+        for (size_t i = 0; i < punchWindow; ++i)
+            punchSum += (double) x[i] * (double) x[i];
+        const auto punchRms = std::sqrt (punchSum / std::max<size_t> (1, punchWindow));
+        const auto punchDb = toDb (attackPeak) - toDb (std::max (punchRms, 1.0e-9));
+
+        // How far the body sits below the hit, measured only where a body
+        // actually exists. Reported with a validity flag instead of a number
+        // that silently means "this preset had already stopped".
         const auto bodyFrom = (size_t) (0.25 * sampleRate);
         const auto bodyTo = std::min (x.size(), (size_t) (0.50 * sampleRate));
+        double bodySum = 0.0;
         for (size_t i = bodyFrom; i < bodyTo; ++i)
             bodySum += (double) x[i] * (double) x[i];
         const auto bodyRms = bodyTo > bodyFrom
                                ? std::sqrt (bodySum / (double) (bodyTo - bodyFrom))
                                : 0.0;
-        const auto knockDb = toDb (attackPeak) - toDb (std::max (bodyRms, 1.0e-9));
+        const auto bodyValid = bodyRms > peak * 0.001; // body above -60 dB of the hit
+        const auto bodyRatioDb = bodyValid ? toDb (attackPeak) - toDb (bodyRms) : 0.0;
 
         // High-frequency content of the attack: first difference rejects the
         // sub fundamental, so what remains is the click's own band.
@@ -329,7 +359,10 @@ int main (int argc, char* argv[])
              << ",\"h3\":" << juce::String (h3 / reference, 4)
              << ",\"h5\":" << juce::String (h5 / reference, 4)
              << ",\"h7\":" << juce::String (h7 / reference, 4)
-             << ",\"knockDb\":" << juce::String (knockDb, 2)
+             << ",\"punchDb\":" << juce::String (punchDb, 2)
+             << ",\"bodyRatioDb\":" << juce::String (bodyRatioDb, 2)
+             << ",\"bodyValid\":" << (bodyValid ? "true" : "false")
+             << ",\"harmWindowMs\":" << juce::String ((harmonicEnd - harmonicStart) * 1000.0, 1)
              << ",\"attackHfDb\":" << juce::String (toDb (attackHf) - toDb (peak), 2)
              << ",\"dropSemitones\":" << juce::String (startSemitones, 2)
              << ",\"settleMs\":" << juce::String (settleMs, 1)
