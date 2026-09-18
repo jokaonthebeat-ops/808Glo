@@ -16,7 +16,7 @@ Do not change these values after release. DAW projects and Audio Unit discovery 
 | Field | Value |
 |---|---|
 | Product | 808Glo Pro |
-| Version | 1.0.0 |
+| Version | 1.0.1 |
 | Company | Diamond Loopz |
 | Bundle ID | `com.diamondloopz.808glopro` |
 | Manufacturer code | `Dlpz` |
@@ -72,7 +72,7 @@ cd /absolute/path/to/808GloPro
 
 export GLO_ROOT="$PWD"
 export GLO_BUILD="$GLO_ROOT/build/macos-release"
-export GLO_VERSION="1.0.0"
+export GLO_VERSION="1.0.1"
 export JUCE_DIR="/absolute/path/to/JUCE"
 ```
 

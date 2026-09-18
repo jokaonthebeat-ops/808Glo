@@ -1,0 +1,14 @@
+808Glo Pro @VERSION@
+Copyright (c) 2026 Diamond Loopz
+
+Built with the JUCE framework (https://juce.com). JUCE is licensed separately;
+distributing a plugin built with it requires either a commercial JUCE licence or
+compliance with the AGPLv3. Review your JUCE licensing position before
+distributing this installer.
+
+VST is a trademark of Steinberg Media Technologies GmbH. Audio Units is a
+technology of Apple Inc.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.

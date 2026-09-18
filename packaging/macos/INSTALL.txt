@@ -1,0 +1,39 @@
+808GLO PRO @VERSION@ - MACOS INSTALL
+Diamond Loopz
+================================
+
+Requirements: macOS 11.0 or later. Intel and Apple Silicon Macs are both
+supported natively by the same universal installer.
+
+Install
+-------
+1. Open the Installer folder and double-click
+   808GloPro-@VERSION@-macOS-Universal.pkg
+2. Follow the steps. The package is signed and notarized by Apple, so no
+   security warnings should appear.
+3. Restart your DAW and rescan plug-ins if it does not pick the new
+   instrument up automatically.
+
+The installer places:
+
+    /Library/Audio/Plug-Ins/VST3/808Glo Pro.vst3
+    /Library/Audio/Plug-Ins/Components/808Glo Pro.component   (AU, for Logic)
+    /Applications/808Glo Pro.app                              (Standalone)
+
+All 128 factory presets are built into the plug-in itself - there is no
+separate content folder to install and nothing that can go missing.
+
+First run in Logic Pro
+----------------------
+Logic lists the instrument under AU Instruments > Diamond Loopz. If it does
+not appear right away, run "Plug-in Manager" and reset & rescan, or restart
+the Mac - macOS caches Audio Unit registrations.
+
+User presets
+------------
+Your own sounds save as portable .808glo files in your user Application
+Support folder and survive updates and reinstalls.
+
+Uninstall
+---------
+Delete the three installed items listed above.

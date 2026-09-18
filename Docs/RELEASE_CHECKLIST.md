@@ -12,7 +12,7 @@ The current source passes strict GCC 13.3 core compilation, AddressSanitizer/Und
 
 ## 1. Freeze identity and scope
 
-- [ ] Release version is approved: `1.0.0`.
+- [ ] Release version is approved: `1.0.1`.
 - [ ] Product name is `808Glo Pro`.
 - [ ] Company is `Diamond Loopz`.
 - [ ] Bundle ID is `com.diamondloopz.808glopro`.
@@ -108,7 +108,7 @@ An ad-hoc macOS signature, self-signed Windows certificate, expired/untrusted ch
 
 ### macOS package
 
-- [ ] Filename is `808GloPro-1.0.0-macOS-Universal.pkg`.
+- [ ] Filename is `808GloPro-1.0.1-macOS-Universal.pkg`.
 - [ ] Payload contains VST3, AU and Standalone in the documented system locations.
 - [ ] Package is signed with Developer ID Installer.
 - [ ] `pkgutil --check-signature` passes.
@@ -120,7 +120,7 @@ An ad-hoc macOS signature, self-signed Windows certificate, expired/untrusted ch
 
 ### Windows installer
 
-- [ ] Filename is `808GloPro-1.0.0-Windows-x64-Setup.exe`.
+- [ ] Filename is `808GloPro-1.0.1-Windows-x64-Setup.exe`.
 - [ ] Installer contains the complete VST3 bundle and Standalone app.
 - [ ] Installer has a valid trusted SHA-256 Authenticode signature and timestamp.
 - [ ] Fresh install passes on a clean Windows 11 x64 machine.

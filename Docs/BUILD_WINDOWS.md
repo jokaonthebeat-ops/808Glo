@@ -15,7 +15,7 @@ Do not change these values after release. Existing DAW projects use the plug-in 
 | Field | Value |
 |---|---|
 | Product | 808Glo Pro |
-| Version | 1.0.0 |
+| Version | 1.0.1 |
 | Company | Diamond Loopz |
 | Bundle ID | `com.diamondloopz.808glopro` |
 | Manufacturer code | `Dlpz` |
@@ -73,7 +73,7 @@ Set-Location "C:\absolute\path\to\808GloPro"
 $Root = (Get-Location).Path
 $Build = Join-Path $Root "build\windows-release"
 $JuceDir = "C:\SDKs\JUCE"
-$Version = "1.0.0"
+$Version = "1.0.1"
 ```
 
 Use a new build directory for every release candidate. Do not reuse a tree created with another JUCE version, generator, architecture, or compiler toolset.
@@ -207,7 +207,7 @@ Create `Packaging\Windows\808GloPro.iss` with the following release definition. 
 
 ```ini
 #define MyAppName "808Glo Pro"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "Diamond Loopz"
 #define Artifacts "..\..\build\windows-release\808GloPro_artefacts\Release"
 

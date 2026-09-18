@@ -21,14 +21,14 @@ Complete this checklist against the exact signed release-candidate binaries. Rec
 
 ## Release-candidate record
 
-- [ ] Version is `1.0.0` everywhere.
+- [ ] Version is `1.0.1` everywhere.
 - [ ] Source commit/tag: ______________________________
 - [ ] JUCE tag is exactly `9.0.1`.
 - [ ] CMake version: ______________________________
 - [ ] macOS Xcode/SDK version: ______________________________
 - [ ] Windows Visual Studio/MSVC/SDK version: ______________________________
-- [ ] macOS release filename: `808GloPro-1.0.0-macOS-Universal.pkg`
-- [ ] Windows release filename: `808GloPro-1.0.0-Windows-x64-Setup.exe`
+- [ ] macOS release filename: `808GloPro-1.0.1-macOS-Universal.pkg`
+- [ ] Windows release filename: `808GloPro-1.0.1-Windows-x64-Setup.exe`
 - [ ] Tester and date: ______________________________
 - [ ] Validator and test logs are archived with this candidate.
 

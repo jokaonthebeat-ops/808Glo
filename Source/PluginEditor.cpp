@@ -459,7 +459,8 @@ EightOhEightGloProAudioProcessorEditor::EightOhEightGloProAudioProcessorEditor (
                         glo::ui::GloPalette::accent().withAlpha (0.24f));
 
     statusLabel.setText (juce::String::fromUTF8 (
-                             "4× OVERSAMPLED DRIVE  •  TUNED MIDI  •  SUB-SAFE STEREO  •  v1.0.0"),
+                             "4× OVERSAMPLED DRIVE  •  TUNED MIDI  •  SUB-SAFE STEREO  •  v")
+                             + JucePlugin_VersionString,
                          juce::dontSendNotification);
     statusLabel.setColour (juce::Label::textColourId, glo::ui::GloPalette::textMuted());
     statusLabel.setFont (juce::Font (juce::FontOptions (10.5f, juce::Font::bold)));
