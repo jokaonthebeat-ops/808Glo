@@ -182,15 +182,28 @@ jobs:
           # Factory presets and artwork are embedded in the binaries - nothing
           # else ships beside the .exe.
 
-          Copy-Item packaging\windows\INSTALL.txt "$stage\INSTALL.txt"
-          Copy-Item LICENSE.txt "$stage\License.txt"
-
-          # Tag builds carry the tag's version; branch builds are "dev".
-          if ("${{ github.ref_type }}" -eq "tag") {
-            $version = "${{ github.ref_name }}".TrimStart("v")
-          } else {
-            $version = "dev"
+          # The version comes from CMakeLists.txt, the same source the binaries
+          # and the macOS package use, so a branch build is named for what it
+          # actually contains. A tag must agree with it or the run fails.
+          $cmake = Get-Content CMakeLists.txt -Raw
+          if ($cmake -notmatch 'project\(808GloPro VERSION ([0-9.]+)') {
+            throw "could not read the version from CMakeLists.txt"
           }
+          $version = $Matches[1]
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $tagVersion = "${{ github.ref_name }}".TrimStart("v")
+            if ($tagVersion -ne $version) {
+              throw "tag v$tagVersion does not match CMakeLists.txt version $version"
+            }
+          }
+
+          Copy-Item packaging\windows\INSTALL.txt "$stage\INSTALL.txt"
+          # The customer licence notice, not the repository's LICENSE.txt: that
+          # file governs the SOURCE code and forbids redistributing it, which
+          # is the wrong document to hand someone who bought the plug-in.
+          (Get-Content packaging\windows\license.txt -Raw).Replace("@VERSION@", $version) |
+            Set-Content -NoNewline "$stage\License.txt"
+
           $zip = "808GloPro-$version-Windows-x64.zip"
           Compress-Archive -Path $stage -DestinationPath $zip -Force
           echo "DIST_ZIP=$zip" >> $env:GITHUB_ENV
