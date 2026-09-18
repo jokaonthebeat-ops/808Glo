@@ -8,13 +8,13 @@
       "schemaVersion": 1,
       "name": "Pure Current",
       "category": "Clean & Sub",
-      "description": "A pure sine-led foundation with a deep, even tail.",
+      "description": "A sine-led sub with a light second-harmonic lift and a quicker fade for busier grooves.",
       "tags": [
         "clean",
         "sub",
         "mono",
-        "pure",
-        "long"
+        "sine-led",
+        "second-harmonic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -55,7 +55,7 @@
       "schemaVersion": 1,
       "name": "Deep Water",
       "category": "Clean & Sub",
-      "description": "A soft slow-blooming sub for sparse arrangements.",
+      "description": "A soft-fronted sub with a deep, fast pitch dive that holds steady in sparse arrangements.",
       "tags": [
         "clean",
         "sub",
@@ -102,13 +102,13 @@
       "schemaVersion": 1,
       "name": "Night Foundation",
       "category": "Clean & Sub",
-      "description": "A round clean 808 with a firmer front edge.",
+      "description": "A round clean 808 with a soft, dark front edge and a tail that stops neatly.",
       "tags": [
         "clean",
         "sub",
         "mono",
         "round",
-        "firm"
+        "soft-click"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -149,13 +149,13 @@
       "schemaVersion": 1,
       "name": "Silent Pressure",
       "category": "Clean & Sub",
-      "description": "An ultra-dark sustained sub that leaves the upper mix untouched.",
+      "description": "A legato sub that sustains while held, with a light pitch drop and a slow release.",
       "tags": [
         "clean",
         "sub",
         "mono",
-        "dark",
-        "sustained"
+        "sustained",
+        "legato"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -196,13 +196,14 @@
       "schemaVersion": 1,
       "name": "Round Table",
       "category": "Clean & Sub",
-      "description": "A rounded triangle blend with restrained tape color.",
+      "description": "A near-sine sub with a touch of Warm-mode drive color and a body that holds steady.",
       "tags": [
         "clean",
         "sub",
         "mono",
-        "rounded",
-        "tape"
+        "near-sine",
+        "warm-drive",
+        "steady"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -290,12 +291,14 @@
       "schemaVersion": 1,
       "name": "Clean Sweep",
       "category": "Clean & Sub",
-      "description": "A clean high-impact drop that settles into an uncluttered sub.",
+      "description": "A long, uncluttered sub with a split-second pitch snap and a hard, clean stop.",
       "tags": [
         "clean",
         "sub",
         "mono",
-        "impact"
+        "pitch-snap",
+        "long",
+        "hard-stop"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -430,13 +433,14 @@
       "schemaVersion": 1,
       "name": "Subtle Giant",
       "category": "Clean & Sub",
-      "description": "A broad clean body with just enough harmonic translation.",
+      "description": "A deep pitch fall into a near-pure sub, built for club and car systems.",
       "tags": [
         "clean",
         "sub",
         "mono",
-        "broad",
-        "translation"
+        "near-pure",
+        "deep-fall",
+        "club"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -483,7 +487,8 @@
         "sub",
         "mono",
         "polished",
-        "even-harmonic"
+        "pure",
+        "long"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -524,12 +529,13 @@
       "schemaVersion": 1,
       "name": "Low Meridian",
       "category": "Clean & Sub",
-      "description": "A stable tonal sub with gentle key tracking for melodic basslines.",
+      "description": "A stable poly sub with key-tracked tone for melodic basslines and overlapping notes.",
       "tags": [
         "clean",
         "sub",
         "tonal",
-        "melodic"
+        "melodic",
+        "poly"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -617,13 +623,14 @@
       "schemaVersion": 1,
       "name": "Funeral Trunk",
       "category": "Trap",
-      "description": "A dark long trap tail with controlled low-mid weight.",
+      "description": "A warm-driven trap 808 that holds its low-mid weight for half a second, then drops.",
       "tags": [
         "trap",
         "modern",
         "hard",
-        "dark",
-        "long"
+        "warm",
+        "saturated",
+        "low-mid"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -664,13 +671,14 @@
       "schemaVersion": 1,
       "name": "Crown Pressure",
       "category": "Trap",
-      "description": "A clipped crown-heavy hit for aggressive sparse drums.",
+      "description": "A wavefolded trap 808 with odd-harmonic bite that holds full level for sparse drums.",
       "tags": [
         "trap",
         "modern",
         "hard",
-        "clipped",
-        "aggressive"
+        "folded",
+        "aggressive",
+        "odd-harmonic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -711,13 +719,14 @@
       "schemaVersion": 1,
       "name": "Dark Alley Bend",
       "category": "Trap",
-      "description": "A low-passed trap slide with a patient pitch bend.",
+      "description": "A legato trap slide with a bright click over a lean body that rings while held.",
       "tags": [
         "trap",
         "modern",
         "hard",
-        "dark",
-        "slide"
+        "slide",
+        "legato",
+        "held"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -758,13 +767,14 @@
       "schemaVersion": 1,
       "name": "Chrome Rattle",
       "category": "Trap",
-      "description": "A bright metallic trap body that cuts through small speakers.",
+      "description": "A bright, rounded trap 808 with a short tail that cuts through small speakers.",
       "tags": [
         "trap",
         "modern",
         "hard",
         "bright",
-        "metallic"
+        "rounded",
+        "small-speaker"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -899,13 +909,14 @@
       "schemaVersion": 1,
       "name": "Black Diamond",
       "category": "Trap",
-      "description": "A polished asymmetrical 808 with expensive low-mid grit.",
+      "description": "A polished trap 808 with a steep pitch drop and hard-clipped low-mid grit.",
       "tags": [
         "trap",
         "modern",
         "hard",
         "polished",
-        "asymmetrical"
+        "hard-clip",
+        "gritty"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -946,13 +957,14 @@
       "schemaVersion": 1,
       "name": "Glo Season",
       "category": "Trap",
-      "description": "A sharp short-drop trap hit with an oversized first transient.",
+      "description": "A hard-driven trap 808 with a tight click and a dense body that holds past one second.",
       "tags": [
         "trap",
         "modern",
         "hard",
-        "sharp",
-        "transient"
+        "driven",
+        "dense",
+        "full-body"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -993,13 +1005,14 @@
       "schemaVersion": 1,
       "name": "Trunk Ritual",
       "category": "Trap",
-      "description": "A slow dirty trunk rumbler with a wide tonal footprint.",
+      "description": "A slow-falling trunk rumbler with a punchy front and a long, lightly driven held tail.",
       "tags": [
         "trap",
         "modern",
         "hard",
         "rumble",
-        "dirty"
+        "slow-drop",
+        "legato"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1134,13 +1147,14 @@
       "schemaVersion": 1,
       "name": "Dead Center",
       "category": "Trap",
-      "description": "A mono-solid trap fundamental with no wasted upper fizz.",
+      "description": "A mono trap 808 with a soft front and an even body that stops cleanly for tight patterns.",
       "tags": [
         "trap",
         "modern",
         "hard",
         "mono",
-        "focused"
+        "soft-transient",
+        "tight"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1228,13 +1242,14 @@
       "schemaVersion": 1,
       "name": "Furnace Teeth",
       "category": "Distorted",
-      "description": "A hard-clipped furnace 808 with retained fundamental weight.",
+      "description": "A dense wavefolded 808 with only a 5-semitone drop, for gritty melodic bass lines.",
       "tags": [
         "distorted",
         "aggressive",
         "harmonic",
-        "hard-clip",
-        "dense"
+        "folded",
+        "dense",
+        "small-drop"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1275,13 +1290,14 @@
       "schemaVersion": 1,
       "name": "Burn Notice",
       "category": "Distorted",
-      "description": "A warm asymmetrical burn with a longer musical tail.",
+      "description": "A hard-clipped burn with a low-punch front and a squared-off one-second body.",
       "tags": [
         "distorted",
         "aggressive",
         "harmonic",
-        "warm",
-        "asymmetrical"
+        "hard-clip",
+        "low-punch",
+        "legato"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1322,7 +1338,7 @@
       "schemaVersion": 1,
       "name": "Crushed Chrome",
       "category": "Distorted",
-      "description": "A bright crushed 808 for maximal high-frequency presence.",
+      "description": "A bright crushed 808 with strong upper harmonics that clears in under a second.",
       "tags": [
         "distorted",
         "aggressive",
@@ -1463,13 +1479,14 @@
       "schemaVersion": 1,
       "name": "Asphalt Grinder",
       "category": "Distorted",
-      "description": "A slow grinding 808 with resonant low-mid distortion.",
+      "description": "A long legato grinder with heavy low-mid bulk that rings out after you let go.",
       "tags": [
         "distorted",
         "aggressive",
         "harmonic",
-        "resonant",
-        "slow"
+        "grinding",
+        "long",
+        "legato"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1510,13 +1527,13 @@
       "schemaVersion": 1,
       "name": "Voltage Scar",
       "category": "Distorted",
-      "description": "A dense mid-length burn with the widest upper-harmonic spread here.",
+      "description": "A dense mid-length burn with a bright cutting attack and a clean, fast stop.",
       "tags": [
         "distorted",
         "aggressive",
         "harmonic",
-        "short",
-        "layered"
+        "mid-length",
+        "bright-attack"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1557,13 +1574,14 @@
       "schemaVersion": 1,
       "name": "Broken Amp",
       "category": "Distorted",
-      "description": "A blown-amplifier texture with an uneven aggressive edge.",
+      "description": "A blown-amp wall of hard clipping that stays dead level while the key is held.",
       "tags": [
         "distorted",
         "aggressive",
         "harmonic",
         "blown-amp",
-        "rough"
+        "rough",
+        "sustained"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1604,7 +1622,7 @@
       "schemaVersion": 1,
       "name": "Red Static",
       "category": "Distorted",
-      "description": "An extreme short static hit for rage and industrial patterns.",
+      "description": "An extreme static wall with the bank's heaviest drive, for rage and industrial patterns.",
       "tags": [
         "distorted",
         "aggressive",
@@ -1651,13 +1669,14 @@
       "schemaVersion": 1,
       "name": "Iron Lung",
       "category": "Distorted",
-      "description": "A dark breathing distortion with a very long gated tail.",
+      "description": "A warm slide 808 with the category's deepest pitch dive and a long, quiet gated tail.",
       "tags": [
         "distorted",
         "aggressive",
         "harmonic",
-        "dark",
-        "gated"
+        "gated",
+        "deep-drop",
+        "slide"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1745,13 +1764,13 @@
       "schemaVersion": 1,
       "name": "Circuit Bruise",
       "category": "Distorted",
-      "description": "A bruised soft-clip tone with heavy even-harmonic bloom.",
+      "description": "A bruised hard-clipped 808 squashed into a flat, even block about a second long.",
       "tags": [
         "distorted",
         "aggressive",
         "harmonic",
-        "soft-clip",
-        "even-harmonic"
+        "hard-clip",
+        "squashed"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -1933,7 +1952,7 @@
       "schemaVersion": 1,
       "name": "Frozen Block",
       "category": "Drill",
-      "description": "An icy drill 808 with a steep 28-semitone fall into a long body.",
+      "description": "An icy fold-driven drill 808 with a steep 21-semitone fall that holds until release.",
       "tags": [
         "drill",
         "glide",
@@ -1980,13 +1999,13 @@
       "schemaVersion": 1,
       "name": "Concrete Freeze",
       "category": "Drill",
-      "description": "An ultra-low sustained drill foundation for sparse piano loops.",
+      "description": "A warm-driven sustained drill foundation for sparse piano loops.",
       "tags": [
         "drill",
         "glide",
         "mono-legato",
         "sustained",
-        "ultra-low"
+        "warm-drive"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2027,13 +2046,13 @@
       "schemaVersion": 1,
       "name": "Dark March",
       "category": "Drill",
-      "description": "A gritty marching drill bass with an assertive upper edge.",
+      "description": "A nearly undriven, round-bodied drill bass whose tail sinks slowly on long holds.",
       "tags": [
         "drill",
         "glide",
         "mono-legato",
-        "gritty",
-        "mid-forward"
+        "low-drive",
+        "rounded"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2168,12 +2187,12 @@
       "schemaVersion": 1,
       "name": "Alley Phantom",
       "category": "Drill",
-      "description": "A nearly pure phantom sub with an extra-long legato tail.",
+      "description": "A phantom legato sub with the longest glide in Drill and a long release tail.",
       "tags": [
         "drill",
         "glide",
         "mono-legato",
-        "pure",
+        "long-glide",
         "phantom"
       ],
       "author": "Diamond Loopz",
@@ -2220,8 +2239,8 @@
         "drill",
         "glide",
         "mono-legato",
-        "compact",
-        "knock"
+        "knock",
+        "fast-settle"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2262,13 +2281,13 @@
       "schemaVersion": 1,
       "name": "Winter Pressure",
       "category": "Drill",
-      "description": "A balanced winter-dark slide suitable for full drill arrangements.",
+      "description": "A punchy, balanced drill slide that holds steady through full arrangements.",
       "tags": [
         "drill",
         "glide",
         "mono-legato",
         "balanced",
-        "dark"
+        "punchy"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2309,12 +2328,13 @@
       "schemaVersion": 1,
       "name": "Steel Slide",
       "category": "Drill",
-      "description": "The sharpest attack in the category over a clean sustained slide.",
+      "description": "A fast, punchy attack over a clean sustained slide for octave-jumping drill lines.",
       "tags": [
         "drill",
         "glide",
         "mono-legato",
-        "bright",
+        "punchy",
+        "clean",
         "octave-slide"
       ],
       "author": "Diamond Loopz",
@@ -2356,13 +2376,13 @@
       "schemaVersion": 1,
       "name": "North Wind",
       "category": "Drill",
-      "description": "A smooth cold glide with softened transients and a long release.",
+      "description": "A smooth drill glide with a fast attack that rings out on the longest release in Drill.",
       "tags": [
         "drill",
         "glide",
         "mono-legato",
-        "smooth",
-        "soft-transient"
+        "fast-attack",
+        "long-release"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2408,7 +2428,7 @@
         "drill",
         "glide",
         "mono-legato",
-        "nimble",
+        "body-heavy",
         "ghost-note"
       ],
       "author": "Diamond Loopz",
@@ -2544,13 +2564,14 @@
       "schemaVersion": 1,
       "name": "Buffed Up",
       "category": "Detroit",
-      "description": "An extremely tight bright knock with hard clipping.",
+      "description": "An extremely tight bright knock with wavefolded bite.",
       "tags": [
         "detroit",
         "short",
         "bounce",
         "tight",
-        "bright"
+        "bright",
+        "folded"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2591,13 +2612,14 @@
       "schemaVersion": 1,
       "name": "Woodward Knock",
       "category": "Detroit",
-      "description": "A woody centered knock with extra fundamental beneath it.",
+      "description": "A woody knock squashed by Detroit's heaviest warm drive for thick bounce.",
       "tags": [
         "detroit",
         "short",
         "bounce",
         "woody",
-        "centered"
+        "saturated",
+        "squashed"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2638,13 +2660,13 @@
       "schemaVersion": 1,
       "name": "Motor City Glide",
       "category": "Detroit",
-      "description": "A rare sliding Detroit 808 that stays short and rhythmic.",
+      "description": "A rare sliding Detroit 808 with the category's longest tail for legato runs.",
       "tags": [
         "detroit",
         "short",
         "bounce",
         "slide",
-        "rhythmic"
+        "legato"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2685,13 +2707,13 @@
       "schemaVersion": 1,
       "name": "Punchline Pocket",
       "category": "Detroit",
-      "description": "A one-shot punctuation hit with maximum initial punch.",
+      "description": "A one-shot punctuation hit with a needle-short click over a fuller body.",
       "tags": [
         "detroit",
         "short",
         "bounce",
         "one-shot",
-        "maximum-punch"
+        "tight-click"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2732,7 +2754,7 @@
       "schemaVersion": 1,
       "name": "Fast Talk",
       "category": "Detroit",
-      "description": "A rapid clean-cut 808 for dense talk-over-the-beat patterns.",
+      "description": "A rapid hard-clipped 808 with a sharp cutoff for dense talk-over patterns.",
       "tags": [
         "detroit",
         "short",
@@ -2779,13 +2801,14 @@
       "schemaVersion": 1,
       "name": "Coney Bass",
       "category": "Detroit",
-      "description": "A dark rounded Detroit bass with a little more tail.",
+      "description": "A tight warm-driven Detroit bass with a rounded front and odd-harmonic growl.",
       "tags": [
         "detroit",
         "short",
         "bounce",
-        "dark",
-        "rounded"
+        "rounded",
+        "odd-harmonic",
+        "saturated"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2826,13 +2849,13 @@
       "schemaVersion": 1,
       "name": "Paper Route",
       "category": "Detroit",
-      "description": "A mid-heavy clipped bounce that survives phone playback.",
+      "description": "A punchy clipped bounce that clears out fast for busy drum patterns.",
       "tags": [
         "detroit",
         "short",
         "bounce",
-        "mid-heavy",
-        "phone-ready"
+        "punchy",
+        "hard-clip"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -2873,13 +2896,14 @@
       "schemaVersion": 1,
       "name": "Side Door",
       "category": "Detroit",
-      "description": "A stealthy dry short bass with restrained click and grit.",
+      "description": "A stealthy dry short bass with light drive and a harmonic-rich body.",
       "tags": [
         "detroit",
         "short",
         "bounce",
         "dry",
-        "restrained"
+        "light-drive",
+        "harmonic-rich"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3014,13 +3038,14 @@
       "schemaVersion": 1,
       "name": "Palm Bounce",
       "category": "West Coast",
-      "description": "A warm round coastal 808 with an easy medium glide.",
+      "description": "A warm round coastal 808 with a quick glide and a long, steady one-shot tail.",
       "tags": [
         "west-coast",
         "warm",
         "glide",
         "round",
-        "easy-glide"
+        "quick-glide",
+        "long-tail"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3061,13 +3086,13 @@
       "schemaVersion": 1,
       "name": "Chrome Coast",
       "category": "West Coast",
-      "description": "A polished upper-harmonic coast bass with chrome definition.",
+      "description": "A warm, steady-pitched coast bass with a soft, dark attack for smooth legato lines.",
       "tags": [
         "west-coast",
         "warm",
         "glide",
-        "polished",
-        "defined"
+        "steady-pitch",
+        "dark-attack"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3108,13 +3133,14 @@
       "schemaVersion": 1,
       "name": "Lowrider Lean",
       "category": "West Coast",
-      "description": "A slow leaning long-tail 808 for spacious west-coast drums.",
+      "description": "A long-tail lowrider 808 with the deepest pitch fall in West Coast for spacious beats.",
       "tags": [
         "west-coast",
         "warm",
         "glide",
-        "slow",
-        "long-tail"
+        "long-tail",
+        "deep-fall",
+        "lazy-glide"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3249,13 +3275,14 @@
       "schemaVersion": 1,
       "name": "Hydraulic Drop",
       "category": "West Coast",
-      "description": "A pronounced downward drop with a springy hydraulic tail.",
+      "description": "A one-shot coast 808 with a quick pitch snap and a tail that stops clean.",
       "tags": [
         "west-coast",
         "warm",
         "glide",
-        "drop",
-        "springy"
+        "one-shot",
+        "pitch-snap",
+        "clean-stop"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3296,12 +3323,13 @@
       "schemaVersion": 1,
       "name": "Boulevard Bass",
       "category": "West Coast",
-      "description": "A pure boulevard sub that glides beneath busy instrumentation.",
+      "description": "A sustained boulevard sub with West Coast's longest glide, built to sit under busy beats.",
       "tags": [
         "west-coast",
         "warm",
         "glide",
-        "pure",
+        "sustained",
+        "long-glide",
         "under-mix"
       ],
       "author": "Diamond Loopz",
@@ -3343,13 +3371,14 @@
       "schemaVersion": 1,
       "name": "Coastline Smoke",
       "category": "West Coast",
-      "description": "A dark smoky legato tone with a soft tube edge.",
+      "description": "A smoky legato 808 whose warm-driven body fades early into a faint, lingering tail.",
       "tags": [
         "west-coast",
         "warm",
         "glide",
         "smoky",
-        "tube"
+        "early-fade",
+        "long-release"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3390,13 +3419,14 @@
       "schemaVersion": 1,
       "name": "Coast Chrome",
       "category": "West Coast",
-      "description": "A bright modern coast 808 with wide upper-harmonic character.",
+      "description": "A punchy one-shot coast 808 with thick even-harmonic weight for upfront basslines.",
       "tags": [
         "west-coast",
         "warm",
         "glide",
-        "bright",
-        "modern"
+        "punchy",
+        "one-shot",
+        "even-harmonic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3437,13 +3467,14 @@
       "schemaVersion": 1,
       "name": "Sunday Cruise",
       "category": "West Coast",
-      "description": "A relaxed cruising 808 with a gentle pitch envelope.",
+      "description": "A relaxed, lightly driven 808 with even-harmonic warmth for laid-back cruising grooves.",
       "tags": [
         "west-coast",
         "warm",
         "glide",
         "relaxed",
-        "gentle"
+        "light-drive",
+        "even-harmonic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3535,7 +3566,9 @@
         "west-coast",
         "warm",
         "glide",
-        "firm"
+        "firm",
+        "knock",
+        "deep-fall"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3576,13 +3609,14 @@
       "schemaVersion": 1,
       "name": "Endless Bend",
       "category": "Long Glide",
-      "description": "An extremely long clean bend with an almost continuous tail.",
+      "description": "A very long bend with moderate warm odd-harmonic color and an almost continuous tail.",
       "tags": [
         "long",
         "glide",
         "sustained",
-        "extreme-glide",
-        "clean"
+        "continuous",
+        "warm",
+        "odd-harmonic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3623,13 +3657,13 @@
       "schemaVersion": 1,
       "name": "Silk Slide",
       "category": "Long Glide",
-      "description": "A smooth silky legato slide with soft even harmonics.",
+      "description": "A smooth silky legato slide with light drive and only faint harmonic color.",
       "tags": [
         "long",
         "glide",
         "sustained",
         "smooth",
-        "even-harmonic"
+        "light-drive"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3717,13 +3751,13 @@
       "schemaVersion": 1,
       "name": "Slow Lane",
       "category": "Long Glide",
-      "description": "A pure slow-lane sub with understated note transitions.",
+      "description": "A slow-lane glide with a deep 27-semitone opening drop and a clear odd-harmonic edge.",
       "tags": [
         "long",
         "glide",
         "sustained",
-        "pure",
-        "understated"
+        "deep-drop",
+        "odd-harmonic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -3764,12 +3798,12 @@
       "schemaVersion": 1,
       "name": "Deep Curve",
       "category": "Long Glide",
-      "description": "A dark curved glide with enough harmonics to remain audible.",
+      "description": "A warm-driven curved glide with enough harmonics to remain audible.",
       "tags": [
         "long",
         "glide",
         "sustained",
-        "dark",
+        "driven",
         "audible"
       ],
       "author": "Diamond Loopz",
@@ -3858,12 +3892,12 @@
       "schemaVersion": 1,
       "name": "Ghost Glide",
       "category": "Long Glide",
-      "description": "A nearly invisible fundamental-only glide for layering.",
+      "description": "A soft-fronted ghost glide with a long 1.6-second release, made for layering.",
       "tags": [
         "long",
         "glide",
         "sustained",
-        "fundamental",
+        "soft-transient",
         "layering"
       ],
       "author": "Diamond Loopz",
@@ -4187,7 +4221,7 @@
       "schemaVersion": 1,
       "name": "Chest Tap",
       "category": "Short Punch",
-      "description": "A round chest-level thump with a slightly softer click.",
+      "description": "A round chest-level thump topped with a crisp click for bouncy short patterns.",
       "tags": [
         "short",
         "punch",
@@ -4234,13 +4268,13 @@
       "schemaVersion": 1,
       "name": "Quick Knock",
       "category": "Short Punch",
-      "description": "An ultra-short high-impact knock for rapid patterns.",
+      "description": "A folded knock that rings longer than most short hits, for mid-tempo bounce patterns.",
       "tags": [
         "short",
         "punch",
         "transient",
-        "ultra-short",
-        "rapid"
+        "knock",
+        "folded"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4287,7 +4321,7 @@
         "punch",
         "transient",
         "disciplined",
-        "clear"
+        "tight"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4328,13 +4362,13 @@
       "schemaVersion": 1,
       "name": "Staccato Sub",
       "category": "Short Punch",
-      "description": "A pure staccato sub with almost no upper harmonic content.",
+      "description": "A barely driven staccato sub with built-in second and third harmonics for short stabs.",
       "tags": [
         "short",
         "punch",
         "transient",
-        "pure",
-        "staccato"
+        "staccato",
+        "low-drive"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4422,13 +4456,13 @@
       "schemaVersion": 1,
       "name": "Short Fuse",
       "category": "Short Punch",
-      "description": "An explosive clipped micro-tail for rage-style bass rhythms.",
+      "description": "A fold-driven odd-harmonic hit for bass rhythms, with more tail than most here.",
       "tags": [
         "short",
         "punch",
         "transient",
-        "explosive",
-        "rage"
+        "folded",
+        "odd-harmonic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4469,13 +4503,14 @@
       "schemaVersion": 1,
       "name": "Snap Weight",
       "category": "Short Punch",
-      "description": "A snapping attack paired with a medium-short weighty tail.",
+      "description": "A hard-driven snap with an ultra-short tail for rapid-fire 808 rolls.",
       "tags": [
         "short",
         "punch",
         "transient",
         "snap",
-        "weighty"
+        "ultra-short",
+        "rapid"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4516,12 +4551,13 @@
       "schemaVersion": 1,
       "name": "Pocket Hammer",
       "category": "Short Punch",
-      "description": "A dense hammer strike that remains centered and mono-safe.",
+      "description": "A dense hard-clipped strike that lands as a solid mono-safe block, not a spike.",
       "tags": [
         "short",
         "punch",
         "transient",
         "dense",
+        "hard-clip",
         "mono-safe"
       ],
       "author": "Diamond Loopz",
@@ -4610,13 +4646,13 @@
       "schemaVersion": 1,
       "name": "Fast Cut",
       "category": "Short Punch",
-      "description": "A high-passed-feeling short cut that leaves maximum bass headroom.",
+      "description": "A sub-heavy 808 hit that keeps its weight past a quarter second, for sparse patterns.",
       "tags": [
         "short",
         "punch",
         "transient",
-        "fast",
-        "headroom"
+        "sub-heavy",
+        "weighty"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4657,13 +4693,14 @@
       "schemaVersion": 1,
       "name": "Mini Monster",
       "category": "Short Punch",
-      "description": "A tiny tail with oversized harmonics and hard clip character.",
+      "description": "A tiny-tailed clipped hit with one of the punchiest fronts in the entire bank.",
       "tags": [
         "short",
         "punch",
         "transient",
         "tiny-tail",
-        "oversized"
+        "punchy",
+        "clipped"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4704,13 +4741,14 @@
       "schemaVersion": 1,
       "name": "Zero Gravity",
       "category": "Experimental",
-      "description": "A floating polyphonic bass texture with slow pitch movement.",
+      "description": "A polyphonic chord stab that fades fast to a faint bed for as long as keys are held.",
       "tags": [
         "experimental",
         "fx",
         "wide-harmonics",
         "polyphonic",
-        "floating"
+        "stab",
+        "chords"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4751,13 +4789,14 @@
       "schemaVersion": 1,
       "name": "Phase Beast",
       "category": "Experimental",
-      "description": "A high-resonance harmonic beast with extreme portamento.",
+      "description": "A wavefolded odd-harmonic beast with extreme portamento across legato notes.",
       "tags": [
         "experimental",
         "fx",
         "wide-harmonics",
-        "resonant",
-        "extreme"
+        "folded",
+        "odd-harmonic",
+        "portamento"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4845,13 +4884,14 @@
       "schemaVersion": 1,
       "name": "Rubber Room",
       "category": "Experimental",
-      "description": "A rubbery slow-attack bass that bends dramatically between notes.",
+      "description": "A rubbery bright-attack bass that bends dramatically between notes.",
       "tags": [
         "experimental",
         "fx",
         "wide-harmonics",
         "rubbery",
-        "slow-attack"
+        "legato",
+        "bright-attack"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -4892,7 +4932,7 @@
       "schemaVersion": 1,
       "name": "Alien Trunk",
       "category": "Experimental",
-      "description": "An extreme alien one-shot with folding highs and maximum pitch drop.",
+      "description": "An extreme alien one-shot with folding highs that rings out long on every hit.",
       "tags": [
         "experimental",
         "fx",
@@ -5033,7 +5073,7 @@
       "schemaVersion": 1,
       "name": "Hollow Square",
       "category": "Experimental",
-      "description": "A hollow square-like bass with even harmonics and gate control.",
+      "description": "A hollow square-like bass with odd harmonics and gate control.",
       "tags": [
         "experimental",
         "fx",
@@ -5080,13 +5120,14 @@
       "schemaVersion": 1,
       "name": "Radioactive Sub",
       "category": "Experimental",
-      "description": "A radioactive resonant sub with slow attack and unstable color.",
+      "description": "A radioactive wavefolded bass whose overtones outweigh its fundamental.",
       "tags": [
         "experimental",
         "fx",
         "wide-harmonics",
         "radioactive",
-        "resonant"
+        "folded",
+        "bright-attack"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5127,13 +5168,14 @@
       "schemaVersion": 1,
       "name": "Reverse Gravity",
       "category": "Experimental",
-      "description": "A slow-settling pitch illusion with maximal expressive glide.",
+      "description": "A 31-semitone dive that lands fast, with the longest glide in the bank.",
       "tags": [
         "experimental",
         "fx",
         "wide-harmonics",
-        "pitch-illusion",
-        "expressive"
+        "pitch-dive",
+        "portamento",
+        "legato"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5180,7 +5222,8 @@
         "fx",
         "wide-harmonics",
         "octave-up",
-        "fractured"
+        "one-shot",
+        "long-tail"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5227,7 +5270,8 @@
         "fx",
         "wide-harmonics",
         "laser",
-        "dark-sub"
+        "clicky",
+        "long-sustain"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5315,13 +5359,13 @@
       "schemaVersion": 1,
       "name": "Small Speaker Safe",
       "category": "Mix Ready",
-      "description": "A harmonic-balanced 808 that remains audible on small speakers.",
+      "description": "A mostly fundamental 808 whose punchy front keeps hits readable on small speakers.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
         "small-speaker",
-        "audible"
+        "punchy"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5362,13 +5406,13 @@
       "schemaVersion": 1,
       "name": "Master Bus Safe",
       "category": "Mix Ready",
-      "description": "A conservative clean sub with ample mastering headroom.",
+      "description": "A lightly compressed 808 that keeps its natural dynamics for the mastering stage.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
-        "headroom",
-        "clean"
+        "lightly-compressed",
+        "dynamic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5409,13 +5453,14 @@
       "schemaVersion": 1,
       "name": "Club Translation",
       "category": "Mix Ready",
-      "description": "A club-balanced 808 with firm fundamental and audible mids.",
+      "description": "A short, fundamental-heavy 808 with a 72 ms legato glide, built for tidy club low end.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
         "club",
-        "balanced"
+        "fundamental",
+        "legato"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5456,13 +5501,14 @@
       "schemaVersion": 1,
       "name": "Streaming Low",
       "category": "Mix Ready",
-      "description": "A compact level-controlled low end prepared for streaming masters.",
+      "description": "A lean mid-length 808 with a long pitch sweep, prepared for streaming masters.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
         "streaming",
-        "level-controlled"
+        "pitch-sweep",
+        "lean"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5550,13 +5596,14 @@
       "schemaVersion": 1,
       "name": "Clean Loud",
       "category": "Mix Ready",
-      "description": "A clean loudness-optimized 808 without excessive saturation.",
+      "description": "A punchy, dynamic short 808 with a light even-harmonic edge for knock-driven patterns.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
-        "loud",
-        "clean"
+        "punchy",
+        "dynamic",
+        "even-harmonic"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5644,13 +5691,14 @@
       "schemaVersion": 1,
       "name": "Mono Certified",
       "category": "Mix Ready",
-      "description": "A pure centered low end with minimal phase-sensitive harmonics.",
+      "description": "A warm-driven, dead-center 808 with moderate harmonics that sums to mono unchanged.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
         "mono",
-        "phase-safe"
+        "phase-safe",
+        "warm"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5785,13 +5833,13 @@
       "schemaVersion": 1,
       "name": "Phone Weight",
       "category": "Mix Ready",
-      "description": "A carefully driven 808 with second harmonics that survive phone playback.",
+      "description": "A barely driven, heavily compressed 808 that holds its level, then stops cleanly.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
-        "phone",
-        "second-harmonic"
+        "compressed",
+        "low-drive"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5879,13 +5927,14 @@
       "schemaVersion": 1,
       "name": "Headroom",
       "category": "Mix Ready",
-      "description": "A low-output clean utility preset for heavily processed sessions.",
+      "description": "A dense warm-driven 808 with low peaks, leaving headroom in heavily processed sessions.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
         "utility",
-        "low-output"
+        "low-peak",
+        "dense"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5926,13 +5975,14 @@
       "schemaVersion": 1,
       "name": "Centered Low",
       "category": "Mix Ready",
-      "description": "A solid centered body with restrained transient and medium decay.",
+      "description": "A hard-knocking centered 808 with a deep, drawn-out pitch dive for high-impact hooks.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
         "centered",
-        "restrained"
+        "punchy",
+        "pitch-dive"
       ],
       "author": "Diamond Loopz",
       "parameters": {
@@ -5973,13 +6023,14 @@
       "schemaVersion": 1,
       "name": "Final Bounce",
       "category": "Mix Ready",
-      "description": "A punchy polished final-bounce 808 with predictable peak level.",
+      "description": "A short, clipper-capped 808 with a deep pitch drop and predictable peaks for final mixes.",
       "tags": [
         "mix-ready",
         "controlled",
         "translation",
-        "polished",
-        "predictable"
+        "predictable",
+        "clipped",
+        "deep-drop"
       ],
       "author": "Diamond Loopz",
       "parameters": {
