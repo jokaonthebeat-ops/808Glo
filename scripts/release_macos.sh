@@ -12,6 +12,11 @@
 # works on a Command Line Tools-only Mac. The version is read from CMakeLists.txt,
 # so the package name, the bundles and the editor's version label cannot disagree.
 #
+# GLO_REUSE_BUILD=1 skips the compile when build/release-<version> was built from
+# a commit whose Source/, Resources/ and CMakeLists.txt match the current tree -
+# so a packaging-only fix does not cost another universal build. Tests and every
+# check after them still run.
+#
 # Signing identities are discovered from the keychain unless GLO_APP_IDENTITY /
 # GLO_INSTALLER_IDENTITY are set. The notary profile is created once with
 # `xcrun notarytool store-credentials`; no credential is ever read by this script.
@@ -58,6 +63,30 @@ record="${validation}/BUILD_RECORD-${version}.txt"
 
 step() { printf '\n==> %s\n' "$*"; }
 
+# Captured up front: the record must name the commit the binaries came from, and
+# the tree may legitimately move while a long build is running.
+head_commit="$(git -C "${root}" rev-parse HEAD)"
+build_paths=(Source Resources CMakeLists.txt)
+
+reused=0
+if [[ "${GLO_REUSE_BUILD:-0}" == "1" && -f "${build}/SOURCE_COMMIT" ]]; then
+    built_from="$(cat "${build}/SOURCE_COMMIT")"
+    if git -C "${root}" diff --quiet "${built_from}" -- "${build_paths[@]}"; then
+        reused=1
+    else
+        echo "Sources changed since ${built_from}; the build cannot be reused." >&2
+        exit 1
+    fi
+fi
+
+if [[ "${reused}" == "1" ]]; then
+    step "808Glo Pro ${version}: reusing the build from ${built_from}"
+else
+built_from="${head_commit}"
+if ! git -C "${root}" diff --quiet HEAD -- "${build_paths[@]}"; then
+    echo "Uncommitted changes under ${build_paths[*]}; commit before a release build." >&2
+    exit 1
+fi
 step "808Glo Pro ${version}: configure a fresh universal build"
 rm -rf "${build}"
 cmake -S "${root}" -B "${build}" -G "Unix Makefiles" \
@@ -75,6 +104,8 @@ targets=(808GloPro_All 808GloCoreTests 808GloJuceIntegrationTests)
 if ! cmake --build "${build}" --target "${targets[@]}" -j "${jobs}" > "${build}.build.log" 2>&1; then
     echo "parallel build failed - retrying serially (see ${build}.build.log)"
     cmake --build "${build}" --target "${targets[@]}" >> "${build}.build.log" 2>&1
+fi
+echo "${built_from}" > "${build}/SOURCE_COMMIT"
 fi
 
 step "test"
@@ -119,10 +150,28 @@ pkgbuild --root "${stage}" --identifier "com.diamondloopz.808glopro.component" \
          --version "${version}" --install-location / "${component_pkg}"
 productbuild --package "${component_pkg}" --sign "${installer_identity}" "${pkg}"
 pkgutil --check-signature "${pkg}" | head -n 3
-if pkgutil --payload-files "${component_pkg}" | grep -q '/\._'; then
-    echo "AppleDouble files leaked into the payload" >&2
+
+# What matters is what lands on a customer's disk, not how the payload encodes
+# it. macOS attaches com.apple.provenance to files built inside some sandboxed
+# sessions and will not let it be removed, and pkgbuild records any extended
+# attribute as a ._ entry. Installation folds those entries back into attributes,
+# so the check is: expand the payload as the installer would, then require no
+# stray ._ files and intact signatures on every bundle.
+expanded="${build}/payload-check"
+rm -rf "${expanded}"
+pkgutil --expand-full "${component_pkg}" "${expanded}"
+if [[ -n "$(find "${expanded}/Payload" -name '._*' -print -quit)" ]]; then
+    echo "The installed payload would contain stray ._ files" >&2
     exit 1
 fi
+for bundle in "Library/Audio/Plug-Ins/VST3/808Glo Pro.vst3" \
+              "Library/Audio/Plug-Ins/Components/808Glo Pro.component" \
+              "Applications/808Glo Pro.app"; do
+    codesign --verify --deep --strict "${expanded}/Payload/${bundle}" \
+        || { echo "Installed signature would be broken: ${bundle}" >&2; exit 1; }
+done
+rm -rf "${expanded}"
+echo "  payload expands cleanly; all three signatures verify as installed"
 
 notary_id="not notarized (internal build)"
 if [[ "${GLO_SKIP_NOTARIZE:-0}" != "1" ]]; then
@@ -155,7 +204,8 @@ ditto -c -k --norsrc --keepParent "${retail}/808Glo Pro" "${zip}"
 mkdir -p "${validation}"
 {
     echo "808Glo Pro ${version} macOS retail build"
-    echo "Source commit: $(git -C "${root}" rev-parse HEAD)$(git -C "${root}" diff --quiet || echo ' (DIRTY TREE)')"
+    echo "Binaries built from: ${built_from}$([[ "${reused}" == "1" ]] && echo ' (build reused)')"
+    echo "Packaged at: ${head_commit}"
     echo "JUCE: $(sed -n 's/.*version: *//p' "${juce_dir}/modules/juce_core/juce_core.h" | head -n 1) at ${juce_dir}"
     echo "Toolchain: $(clang++ --version | head -n 1); $(cmake --version | head -n 1)"
     echo "Architectures: arm64 + x86_64, deployment target 11.0"
