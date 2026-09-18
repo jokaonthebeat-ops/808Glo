@@ -477,7 +477,7 @@
       "schemaVersion": 1,
       "name": "Glass Basement",
       "category": "Clean & Sub",
-      "description": "A polished sub with a light glassy second harmonic.",
+      "description": "A long polished sub that stays almost entirely fundamental.",
       "tags": [
         "clean",
         "sub",
@@ -1510,7 +1510,7 @@
       "schemaVersion": 1,
       "name": "Voltage Scar",
       "category": "Distorted",
-      "description": "A short voltage spike with a clean sub beneath the damage.",
+      "description": "A dense mid-length burn with the widest upper-harmonic spread here.",
       "tags": [
         "distorted",
         "aggressive",
@@ -1933,7 +1933,7 @@
       "schemaVersion": 1,
       "name": "Frozen Block",
       "category": "Drill",
-      "description": "A hard icy drill hit with a fast defined glide.",
+      "description": "An icy drill 808 with a steep 28-semitone fall into a long body.",
       "tags": [
         "drill",
         "glide",
@@ -2215,7 +2215,7 @@
       "schemaVersion": 1,
       "name": "Black Puffer",
       "category": "Drill",
-      "description": "A compact hard drill knock with rapid pitch settling.",
+      "description": "A hard drill knock that settles almost instantly and rings on.",
       "tags": [
         "drill",
         "glide",
@@ -2309,7 +2309,7 @@
       "schemaVersion": 1,
       "name": "Steel Slide",
       "category": "Drill",
-      "description": "A bright steel-edged drill glide for fast octave movement.",
+      "description": "The sharpest attack in the category over a clean sustained slide.",
       "tags": [
         "drill",
         "glide",
@@ -2403,7 +2403,7 @@
       "schemaVersion": 1,
       "name": "Ghost Route",
       "category": "Drill",
-      "description": "A nimble ghost-note drill 808 with a short controllable slide.",
+      "description": "A soft-entry drill 808 that leans on its body instead of its attack.",
       "tags": [
         "drill",
         "glide",
@@ -3530,7 +3530,7 @@
       "schemaVersion": 1,
       "name": "Golden State Knock",
       "category": "West Coast",
-      "description": "A firm west-coast knock with warm saturation and short glide.",
+      "description": "A firm west-coast knock with a deep fall and an unforced tail.",
       "tags": [
         "west-coast",
         "warm",
@@ -5174,7 +5174,7 @@
       "schemaVersion": 1,
       "name": "Broken Orbit",
       "category": "Experimental",
-      "description": "A polyphonic octave-up effect bass with a fractured short envelope.",
+      "description": "A polyphonic octave-dominant bass that rings far above its root.",
       "tags": [
         "experimental",
         "fx",
@@ -5221,7 +5221,7 @@
       "schemaVersion": 1,
       "name": "Laser Basement",
       "category": "Experimental",
-      "description": "A laser-like high click over a dark sustained basement sub.",
+      "description": "A bright clicking texture riding a very long low sustain.",
       "tags": [
         "experimental",
         "fx",
