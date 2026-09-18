@@ -31,8 +31,12 @@ the Mac - macOS caches Audio Unit registrations.
 
 User presets
 ------------
-Your own sounds save as portable .808glo files in your user Application
-Support folder and survive updates and reinstalls.
+Your own sounds save as portable .808glo files in
+
+    ~/Library/Diamond Loopz/808Glo Pro/Presets
+
+(in Finder: Go > Go to Folder, and paste that path). They survive updates and
+reinstalls, and can be copied to another computer.
 
 Uninstall
 ---------

@@ -24,8 +24,12 @@ wrong with it. Loading the VST3 in a DAW shows no prompt at all.
 
 User presets
 ------------
-Your own presets are saved as portable .808glo files under your user
-application-data folder and survive reinstalling or updating the plug-in.
+Your own presets are saved as portable .808glo files in
+
+    %APPDATA%\Diamond Loopz\808Glo Pro\Presets
+
+(paste that into the File Explorer address bar). They survive reinstalling or
+updating the plug-in, and can be copied to another computer.
 
 Uninstall
 ---------

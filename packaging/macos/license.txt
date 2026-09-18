@@ -1,13 +1,20 @@
 808Glo Pro @VERSION@
-Copyright (c) 2026 Diamond Loopz
+Copyright (c) 2026 Diamond Loopz. All rights reserved.
 
-Built with the JUCE framework (https://juce.com). JUCE is licensed separately;
-distributing a plugin built with it requires either a commercial JUCE licence or
-compliance with the AGPLv3. Review your JUCE licensing position before
-distributing this installer.
+808Glo Pro is licensed, not sold, to the person or organisation that purchased
+it, for use in their own music production on the computers they work on. You
+may not resell, rent, share, or redistribute the software or its factory
+presets, or reverse engineer it except where the law expressly allows.
 
-VST is a trademark of Steinberg Media Technologies GmbH. Audio Units is a
-technology of Apple Inc.
+The sounds you make with 808Glo Pro are yours. Audio you create with it,
+including audio rendered from its factory presets, may be used in your own
+productions and releases, commercial or otherwise, without further permission
+or payment.
+
+Third-party notices
+  Built with the JUCE framework (https://juce.com).
+  VST is a trademark of Steinberg Media Technologies GmbH.
+  Audio Units is a technology of Apple Inc.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS

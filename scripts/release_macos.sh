@@ -26,6 +26,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 juce_dir="${GLO_JUCE_DIR:-${1:-}}"
 notary_profile="${GLO_NOTARY_PROFILE:-}"
 jobs="${GLO_JOBS:-2}"
+min_macos="11.0"   # deployment target, the installer's OS gate and LSMinimumSystemVersion
 
 if [[ -z "${juce_dir}" || ! -f "${juce_dir}/CMakeLists.txt" ]]; then
     echo "Set GLO_JUCE_DIR to a JUCE 9 checkout (or pass it as the first argument)." >&2
@@ -94,7 +95,7 @@ cmake -S "${root}" -B "${build}" -G "Unix Makefiles" \
     -DGLO_BUILD_PLUGIN=ON -DGLO_BUILD_TESTS=ON -DGLO_BUILD_TOOLS=OFF \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" \
-    -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 > "${build}.configure.log"
+    -DCMAKE_OSX_DEPLOYMENT_TARGET="${min_macos}" > "${build}.configure.log"
 
 step "build (-j ${jobs})"
 targets=(808GloPro_All 808GloCoreTests 808GloJuceIntegrationTests)
@@ -146,10 +147,74 @@ codesign --verify --deep --strict "${stage}/Applications/808Glo Pro.app"
 
 step "build and sign the installer"
 rm -f "${component_pkg}" "${pkg}"
-pkgbuild --root "${stage}" --identifier "com.diamondloopz.808glopro.component" \
+
+# Bundles must not be relocatable. All three share one CFBundleIdentifier (JUCE
+# gives every format the same ID), and a relocatable bundle is installed wherever
+# the system finds an existing copy with that ID - a stray copy in a Downloads or
+# build folder would silently receive the update instead of /Library.
+component_plist="${build}/component.plist"
+pkgbuild --analyze --root "${stage}" "${component_plist}" > /dev/null
+index=0
+while /usr/libexec/PlistBuddy -c "Print :${index}" "${component_plist}" > /dev/null 2>&1; do
+    # --analyze only writes the key for the .app; for the plug-in bundles it is
+    # absent, and absent means relocatable. Set it where present, add it where not.
+    /usr/libexec/PlistBuddy -c "Set :${index}:BundleIsRelocatable false" "${component_plist}" 2>/dev/null \
+        || /usr/libexec/PlistBuddy -c "Add :${index}:BundleIsRelocatable bool false" "${component_plist}"
+    index=$((index + 1))
+done
+pkgbuild --root "${stage}" --component-plist "${component_plist}" \
+         --identifier "com.diamondloopz.808glopro.component" \
          --version "${version}" --install-location / "${component_pkg}"
-productbuild --package "${component_pkg}" --sign "${installer_identity}" "${pkg}"
+
+# A distribution file gives the installer a title, shows the licence for the
+# customer to accept, and refuses a macOS older than the binaries can run on:
+# they hard-link macOS 11 APIs, so an older system would install a plug-in that
+# silently fails to load.
+resources="${build}/installer-resources"
+rm -rf "${resources}"
+mkdir -p "${resources}"
+sed "s/@VERSION@/${version}/g" "${root}/packaging/macos/license.txt" > "${resources}/license.txt"
+distribution="${build}/distribution.xml"
+productbuild --synthesize --package "${component_pkg}" "${distribution}" > /dev/null
+python3 - "${distribution}" "${version}" "${min_macos}" <<'PYEOF'
+import sys
+path, version, min_os = sys.argv[1:4]
+xml = open(path).read()
+head = '<installer-gui-script minSpecVersion="1">'
+if head not in xml:
+    sys.exit("unexpected productbuild --synthesize output: " + xml[:200])
+extra = (f'\n    <title>808Glo Pro {version}</title>'
+         f'\n    <license file="license.txt"/>'
+         f'\n    <allowed-os-versions><os-version min="{min_os}"/></allowed-os-versions>')
+open(path, "w").write(xml.replace(head, head + extra, 1))
+PYEOF
+productbuild --distribution "${distribution}" --resources "${resources}" \
+             --package-path "${dist}" --sign "${installer_identity}" "${pkg}"
 pkgutil --check-signature "${pkg}" | head -n 3
+
+# Prove the installer carries what was just configured, rather than trusting it.
+inspect="${build}/product-check"
+rm -rf "${inspect}"
+pkgutil --expand "${pkg}" "${inspect}"
+grep -q "os-version min=\"${min_macos}\"" "${inspect}/Distribution" \
+    || { echo "installer has no macOS ${min_macos} gate" >&2; exit 1; }
+grep -q '<license file="license.txt"' "${inspect}/Distribution" \
+    || { echo "installer has no licence pane" >&2; exit 1; }
+# Relocation is declared per bundle in the <relocate> element, not by the
+# top-level relocatable="..." attribute, which reads "false" even on a package
+# whose bundles ARE relocatable. Any bundle listed there fails the release.
+if python3 - "${inspect}" <<'PYEOF'
+import glob, re, sys
+info = open(glob.glob(sys.argv[1] + "/*.pkg/PackageInfo")[0]).read()
+block = re.search(r"<relocate>(.*?)</relocate>", info, re.S)
+sys.exit(0 if block and block.group(1).strip() else 1)
+PYEOF
+then
+    echo "installer still lists a relocatable bundle" >&2
+    exit 1
+fi
+rm -rf "${inspect}"
+echo "  installer: macOS ${min_macos}+ gate, licence pane, no relocatable bundles"
 
 # What matters is what lands on a customer's disk, not how the payload encodes
 # it. macOS attaches com.apple.provenance to files built inside some sandboxed
@@ -184,7 +249,13 @@ if [[ "${GLO_SKIP_NOTARIZE:-0}" != "1" ]]; then
     notary_id="$(sed -n 's/^ *id: //p' "${validation}/notarization-${version}.log" | tail -n 1)"
     xcrun stapler staple "${pkg}"
     xcrun stapler validate "${pkg}"
-    spctl --assess --type install --verbose=2 "${pkg}"
+    # spctl exits 0 on any package when Gatekeeper assessments are disabled on
+    # the build Mac (they are on this one), so its exit status proves nothing.
+    # What it still reports is the SOURCE it would trust, and that is checked.
+    assessment="$(spctl --assess --type install --verbose=2 "${pkg}" 2>&1 || true)"
+    echo "${assessment}"
+    grep -q "source=Notarized Developer ID" <<< "${assessment}" \
+        || { echo "Gatekeeper does not see a notarized Developer ID package" >&2; exit 1; }
 fi
 
 step "assemble the retail download"
@@ -208,7 +279,7 @@ mkdir -p "${validation}"
     echo "Packaged at: ${head_commit}"
     echo "JUCE: $(sed -n 's/.*version: *//p' "${juce_dir}/modules/juce_core/juce_core.h" | head -n 1) at ${juce_dir}"
     echo "Toolchain: $(clang++ --version | head -n 1); $(cmake --version | head -n 1)"
-    echo "Architectures: arm64 + x86_64, deployment target 11.0"
+    echo "Architectures: arm64 + x86_64, deployment target ${min_macos}; installer requires macOS ${min_macos}+"
     echo "Signed: ${app_identity} / ${installer_identity}"
     echo "Notarization: ${notary_id}"
     echo "pkg SHA-256: $(cut -d ' ' -f 1 "${pkg}.sha256")"

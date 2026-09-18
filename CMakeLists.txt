@@ -90,7 +90,18 @@ juce_add_binary_data(808GloAssets
         Resources/FactoryPresets.json
 )
 
+# JUCE never writes LSMinimumSystemVersion, so a Mac older than the deployment
+# target would launch a binary that hard-links macOS 11 symbols (os_workgroup,
+# MIDI 2 event lists) and fail with no explanation. Derived from the target so
+# the two cannot disagree; empty for local builds that leave the target unset.
+set(GLO_PLIST_TO_MERGE "")
+if(APPLE AND CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(GLO_PLIST_TO_MERGE
+        "<plist><dict><key>LSMinimumSystemVersion</key><string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string></dict></plist>")
+endif()
+
 juce_add_plugin(808GloPro
+    PLIST_TO_MERGE "${GLO_PLIST_TO_MERGE}"
     COMPANY_NAME "Diamond Loopz"
     BUNDLE_ID "com.diamondloopz.808glopro"
     PLUGIN_MANUFACTURER_CODE Dlpz
