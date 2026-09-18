@@ -24,7 +24,7 @@ namespace
 constexpr double sampleRate = 48000.0;
 constexpr int blockSize = 512;
 constexpr int probeNote = 29;
-constexpr int pitchProbeNote = 53;
+constexpr int pitchProbeNote = 77; // F5 - see PresetProbe.cpp
 constexpr double renderSeconds = 4.0;
 constexpr double gateSeconds = 2.0;
 
@@ -44,35 +44,51 @@ double goertzel (const std::vector<float>& x, size_t from, size_t to, double fre
     return std::sqrt (std::max (0.0, s1 * s1 + s2 * s2 - k * s1 * s2)) / (n * 0.5);
 }
 
-std::vector<float> lowpassed (const std::vector<float>& x, double cutoff)
+// Short-time autocorrelation pitch contour, used for the drop only.
+//
+// Zero crossings on a lowpassed signal cannot measure this: the lowpass needed
+// to stop a driven preset's harmonics being counted as cycles (1.5x the note)
+// also rejects the drop's OWN high start - a 28-semitone drop from F3 begins at
+// 880 Hz, far above a 262 Hz cutoff - and that silently reported 55 of 128
+// presets as having no pitch drop at all while their parameters clearly set one.
+// Autocorrelation is indifferent to waveform shape and tracks the whole
+// excursion, so it handles the folded and hard-clipped presets too.
+std::vector<std::pair<double, double>> pitchContour (const std::vector<float>& x,
+                                                     double minHz, double maxHz,
+                                                     double untilSeconds)
 {
-    auto out = x;
-    const auto c = (float) std::exp (-2.0 * juce::MathConstants<double>::pi * cutoff / sampleRate);
-    for (int pass = 0; pass < 3; ++pass)
+    std::vector<std::pair<double, double>> out;
+    const auto minLag = (size_t) (sampleRate / maxHz);
+    const auto maxLag = (size_t) (sampleRate / minHz);
+    const auto window = maxLag * 2;
+    const auto hop = (size_t) (0.004 * sampleRate);
+    const auto limit = std::min (x.size(), (size_t) (untilSeconds * sampleRate));
+
+    for (size_t start = 0; start + window < limit; start += hop)
     {
-        float state = 0.0f;
-        for (auto& s : out) { state = s * (1.0f - c) + state * c; s = state; }
+        double energy = 0.0;
+        for (size_t i = start; i < start + window; ++i)
+            energy += (double) x[i] * (double) x[i];
+        if (energy <= 1.0e-12)
+            continue;
+
+        double best = 0.0;
+        size_t bestLag = 0;
+        for (size_t lag = minLag; lag <= maxLag; ++lag)
+        {
+            double sum = 0.0, lagEnergy = 0.0;
+            for (size_t i = start; i + lag < start + window; ++i)
+            {
+                sum += (double) x[i] * (double) x[i + lag];
+                lagEnergy += (double) x[i + lag] * (double) x[i + lag];
+            }
+            const auto norm = sum / std::sqrt (std::max (energy * lagEnergy, 1.0e-20));
+            if (norm > best) { best = norm; bestLag = lag; }
+        }
+        if (bestLag > 0 && best > 0.30)
+            out.emplace_back ((double) start / sampleRate, sampleRate / (double) bestLag);
     }
     return out;
-}
-
-std::vector<std::pair<double, double>> instantaneousPitch (const std::vector<float>& x)
-{
-    std::vector<double> crossings;
-    for (size_t i = 1; i < x.size(); ++i)
-        if (x[i - 1] <= 0.0f && x[i] > 0.0f)
-        {
-            const auto d = (double) x[i] - (double) x[i - 1];
-            const auto f = d > 1.0e-12 ? -(double) x[i - 1] / d : 0.0;
-            crossings.push_back (((double) (i - 1) + f) / sampleRate);
-        }
-    std::vector<std::pair<double, double>> pitch;
-    for (size_t i = 1; i < crossings.size(); ++i)
-    {
-        const auto period = crossings[i] - crossings[i - 1];
-        if (period > 1.0e-6) pitch.emplace_back (crossings[i - 1], 1.0 / period);
-    }
-    return pitch;
 }
 
 double envelopeAt (const std::vector<float>& x, double seconds, double windowMs = 20.0)
@@ -215,24 +231,18 @@ int main (int argc, char* argv[])
         EightOhEightGloProAudioProcessor pitchProcessor;
         applyParameters (pitchProcessor, candidate.getProperty ("parameters", {}));
         const auto pitchRaw = render (pitchProcessor, pitchProbeNote);
-        const auto pitchSignal = lowpassed (pitchRaw, pitchTarget * 1.5);
-        const auto pitch = instantaneousPitch (pitchSignal);
+        const auto& pitchSignal = pitchRaw;
+        const auto pitch = pitchContour (pitchSignal, pitchTarget * 0.6, pitchTarget * 8.0, 0.35);
         double pitchPeak = 0.0;
         for (auto s : pitchSignal) pitchPeak = std::max (pitchPeak, std::abs ((double) s));
         const auto floorLevel = pitchPeak * 0.01;
 
-        std::vector<double> early;
-        for (const auto& [t, f] : pitch)
-            if (t > 0.005 && t < 0.20 && envelopeAt (pitchSignal, t, 30.0) > floorLevel)
-                early.push_back (f);
+        // Peak of the early contour, not a percentile - see PresetProbe.cpp.
         double dropSemitones = 0.0, settleMs = 0.0;
-        if (! early.empty())
-        {
-            auto sorted = early;
-            std::sort (sorted.begin(), sorted.end());
-            dropSemitones = 12.0 * std::log2 (
-                std::max (sorted[(size_t) ((double) (sorted.size() - 1) * 0.9)], 1.0) / pitchTarget);
-        }
+        for (const auto& [t, f] : pitch)
+            if (t < 0.12 && envelopeAt (pitchSignal, t, 30.0) > floorLevel)
+                dropSemitones = std::max (dropSemitones,
+                                          12.0 * std::log2 (std::max (f, 1.0) / pitchTarget));
         for (const auto& [t, f] : pitch)
         {
             if (t < 0.005) continue;

@@ -31,14 +31,18 @@ FEATURES = {
     "h7": 0.9,
     "punchDb": 1.4,
     "attackHfDb": 1.3,
-    "dropSemitones": 1.2,
-    "settleMs": 1.0,
+    # dropSemitones and settleMs are REPORTED but deliberately not scored. The
+    # drop is a fast sweep whose measured height depends on how the amplitude
+    # envelope masks its start (correlation with the parameter is only +0.49
+    # even tracked at F5), and a noisy feature in the metric steers the search
+    # on noise. Every preset is instead GUARANTEED a real drop by the parameter
+    # floors in optimise_bank.py - constructed, not measured.
     "rmsDb": 0.4,
 }
 
 # Harmonic ratios are heavy-tailed: a fold preset can sit 100x above a clean
 # sub, which would swamp every other axis in a linear space.
-LOG_FEATURES = {"h2", "h3", "h5", "h7", "t20Ms", "t40Ms", "settleMs", "attackMs"}
+LOG_FEATURES = {"h2", "h3", "h5", "h7", "t20Ms", "t40Ms", "attackMs"}
 
 
 def normalise(rows):

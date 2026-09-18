@@ -50,6 +50,12 @@ MOVABLE = ["decay", "ampCurve", "drive", "body", "harmonics", "compressor",
 # constraint the metric does not contain, and they are deliberately allowed to
 # overlap between categories, because character (not length) is what separates
 # categories from each other.
+# Every 808 must actually knock, and the knock is the pitch envelope. One cycle
+# of F1 is 22.9 ms, so a drop must span at least two to read as a fall rather
+# than a click. These floors are enforced on every candidate, which is why the
+# drop does not need to be scored in the distance metric.
+PITCH_FLOOR = {"pitchDrop": (10.0, 32.0), "pitchDecay": (46.0, 115.0)}
+
 MUSICAL_DECAY = {
     "Short Punch": (110, 560),   "Detroit": (260, 820),
     "Trap": (620, 1650),         "Mix Ready": (600, 1500),
@@ -121,6 +127,8 @@ def category_ranges(gen):
                 lo, hi = lo - pad, hi + pad
             if axis == "decay":
                 lo, hi = MUSICAL_DECAY[category]
+            elif axis in PITCH_FLOOR:
+                lo, hi = PITCH_FLOOR[axis]
             span[axis] = (max(lo, legal[axis][0]), min(hi, legal[axis][1]))
         ranges[category] = span
     return ranges

@@ -25,7 +25,12 @@ namespace
 constexpr double sampleRate = 48000.0;
 constexpr int blockSize = 512;
 constexpr int probeNote = 29;      // F1, 43.65 Hz - the register 808s live in
-constexpr int pitchProbeNote = 53; // F3, 174.6 Hz - enough cycles to track the drop
+constexpr int pitchProbeNote = 77; // F5, 698 Hz - the drop is a semitone
+                                   // figure, so it can be tracked at any pitch, and up
+                                   // here the analysis window is ~5 ms instead of ~19,
+                                   // which is shorter than the drop itself rather than
+                                   // longer. At F3 the window smeared a 29-semitone
+                                   // fall down to a measured 8.
 constexpr double renderSeconds = 4.0;
 constexpr double gateSeconds = 2.0;
 
@@ -91,48 +96,51 @@ double goertzel (const std::vector<float>& x, size_t from, size_t to, double fre
     return std::sqrt (std::max (0.0, s1 * s1 + s2 * s2 - k * s1 * s2)) / (n * 0.5);
 }
 
-// Three cascaded one-pole lowpasses. Without this, a heavily driven preset's
-// harmonics cross zero far more often than its fundamental does and the drop
-// reads as +75 semitones - impossible, since the parameter maxes at 40.
-std::vector<float> lowpassed (const std::vector<float>& x, double cutoff)
+// Short-time autocorrelation pitch contour, used for the drop only.
+//
+// Zero crossings on a lowpassed signal cannot measure this: the lowpass needed
+// to stop a driven preset's harmonics being counted as cycles (1.5x the note)
+// also rejects the drop's OWN high start - a 28-semitone drop from F3 begins at
+// 880 Hz, far above a 262 Hz cutoff - and that silently reported 55 of 128
+// presets as having no pitch drop at all while their parameters clearly set one.
+// Autocorrelation is indifferent to waveform shape and tracks the whole
+// excursion, so it handles the folded and hard-clipped presets too.
+std::vector<std::pair<double, double>> pitchContour (const std::vector<float>& x,
+                                                     double minHz, double maxHz,
+                                                     double untilSeconds)
 {
-    auto out = x;
-    const auto coefficient = (float) std::exp (-2.0 * juce::MathConstants<double>::pi * cutoff / sampleRate);
-    for (int pass = 0; pass < 3; ++pass)
+    std::vector<std::pair<double, double>> out;
+    const auto minLag = (size_t) (sampleRate / maxHz);
+    const auto maxLag = (size_t) (sampleRate / minHz);
+    const auto window = maxLag * 2;
+    const auto hop = (size_t) (0.004 * sampleRate);
+    const auto limit = std::min (x.size(), (size_t) (untilSeconds * sampleRate));
+
+    for (size_t start = 0; start + window < limit; start += hop)
     {
-        float state = 0.0f;
-        for (auto& sample : out)
+        double energy = 0.0;
+        for (size_t i = start; i < start + window; ++i)
+            energy += (double) x[i] * (double) x[i];
+        if (energy <= 1.0e-12)
+            continue;
+
+        double best = 0.0;
+        size_t bestLag = 0;
+        for (size_t lag = minLag; lag <= maxLag; ++lag)
         {
-            state = sample * (1.0f - coefficient) + state * coefficient;
-            sample = state;
+            double sum = 0.0, lagEnergy = 0.0;
+            for (size_t i = start; i + lag < start + window; ++i)
+            {
+                sum += (double) x[i] * (double) x[i + lag];
+                lagEnergy += (double) x[i + lag] * (double) x[i + lag];
+            }
+            const auto norm = sum / std::sqrt (std::max (energy * lagEnergy, 1.0e-20));
+            if (norm > best) { best = norm; bestLag = lag; }
         }
+        if (bestLag > 0 && best > 0.30)
+            out.emplace_back ((double) start / sampleRate, sampleRate / (double) bestLag);
     }
     return out;
-}
-
-// Interpolated positive-going zero crossings give per-cycle frequency, which
-// is what the pitch drop actually is.
-std::vector<std::pair<double, double>> instantaneousPitch (const std::vector<float>& x)
-{
-    std::vector<double> crossings;
-    for (size_t i = 1; i < x.size(); ++i)
-    {
-        if (x[i - 1] <= 0.0f && x[i] > 0.0f)
-        {
-            const auto denominator = (double) x[i] - (double) x[i - 1];
-            const auto fraction = denominator > 1.0e-12 ? -(double) x[i - 1] / denominator : 0.0;
-            crossings.push_back (((double) (i - 1) + fraction) / sampleRate);
-        }
-    }
-
-    std::vector<std::pair<double, double>> pitch;
-    for (size_t i = 1; i < crossings.size(); ++i)
-    {
-        const auto period = crossings[i] - crossings[i - 1];
-        if (period > 1.0e-6)
-            pitch.emplace_back (crossings[i - 1], 1.0 / period);
-    }
-    return pitch;
 }
 
 double envelopeAt (const std::vector<float>& x, double seconds, double windowMs = 20.0)
@@ -279,8 +287,10 @@ int main (int argc, char* argv[])
         // cycles, and gate every reading on the note still sounding: a preset
         // that has decayed to silence was reporting the pitch of its own
         // denormal noise, 7 octaves sharp.
-        const auto pitchSignal = lowpassed (pitchRender.mono, target * 1.5);
-        const auto pitch = instantaneousPitch (pitchSignal);
+        // Tracked on the RAW render: the drop's own start is far above any
+        // cutoff that would reject the settled note's harmonics.
+        const auto& pitchSignal = pitchRender.mono;
+        const auto pitch = pitchContour (pitchSignal, target * 0.6, target * 8.0, 0.35);
 
         double pitchPeak = 0.0;
         for (auto sample : pitchSignal)
@@ -298,17 +308,15 @@ int main (int argc, char* argv[])
         // Drop height, ignoring the first 5 ms: the click is broadband and its
         // crossings are not the oscillator's. A high percentile rather than the
         // maximum keeps one ragged cycle from setting the number.
-        std::vector<double> earlyFrequencies;
+        // The drop height is a PEAK, not a percentile. The contour yields ~49
+        // frames across the early window but the drop occupies only the first
+        // dozen, so a 90th percentile lands on the settled note and reports no
+        // drop at all - which is exactly what it did for 76 presets whose
+        // parameters clearly set one.
         for (const auto& [time, frequency] : pitch)
-            if (time > 0.005 && time < 0.20 && audibleAt (time))
-                earlyFrequencies.push_back (frequency);
-        if (! earlyFrequencies.empty())
-        {
-            auto sorted = earlyFrequencies;
-            std::sort (sorted.begin(), sorted.end());
-            const auto p90 = sorted[(size_t) ((double) (sorted.size() - 1) * 0.9)];
-            startSemitones = 12.0 * std::log2 (std::max (p90, 1.0) / target);
-        }
+            if (time < 0.12 && audibleAt (time))
+                startSemitones = std::max (startSemitones,
+                                           12.0 * std::log2 (std::max (frequency, 1.0) / target));
 
         for (const auto& [time, frequency] : pitch)
         {
