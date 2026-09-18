@@ -37,7 +37,12 @@ FEATURES = {
     # even tracked at F5), and a noisy feature in the metric steers the search
     # on noise. Every preset is instead GUARANTEED a real drop by the parameter
     # floors in optimise_bank.py - constructed, not measured.
-    "rmsDb": 0.4,
+    # rmsDb is NOT scored: the bank is deliberately level-matched, so loudness
+    # is not available as a differentiator and counting it just made the metric
+    # oscillate - optimise to zero clones, level-match, and 28 come back purely
+    # because the levels converged. crestDb still carries the SHAPE of the level
+    # (how far the peak stands above the average), which is what a listener
+    # actually hears as punch.
 }
 
 # Harmonic ratios are heavy-tailed: a fold preset can sit 100x above a clean
